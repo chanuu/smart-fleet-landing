@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+:root {
+  --amber: hsl(38, 92%, 50%);
+  --amber-soft: hsl(38, 92%, 60%);
+  --amber-deep: hsl(38, 92%, 42%);
+  --amber-glow: hsla(38, 92%, 50%, 0.18);
+  --black: #0a0a0a;
+  --black-2: #131313;
+  --black-3: #1c1c1c;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.62);
+  --text-faint: rgba(255, 255, 255, 0.38);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--black);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hero slider animation */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.4s ease, transform 7s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Radio card checked style */
+.radio-card-on {
+  border-color: var(--amber) !important;
+  background: rgba(245, 158, 11, 0.06) !important;
+  box-shadow: 0 0 0 1px var(--amber);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--black-2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Amber glow radial for hero */
+.amber-radial-glow {
+  background: radial-gradient(ellipse 60% 40% at 50% 60%, hsla(38, 92%, 50%, 0.18) 0%, transparent 70%);
+}
+
+/* Slider dots */
+.slider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.38);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.slider-dot.active {
+  width: 24px;
+  background: var(--amber);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Booking modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Step pill active */
+.step-pill-active {
+  background: var(--amber);
+  color: #000;
+}
+.step-pill-done {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--amber);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+.step-pill-inactive {
+  background: var(--black-3);
+  color: var(--text-faint);
+  border: 1px solid var(--line);
+}
+
+/* Range input */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--amber);
+  cursor: pointer;
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--amber);
+  cursor: pointer;
+  border: none;
+}
+
+/* Focus rings */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.12);
+}

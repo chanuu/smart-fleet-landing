@@ -1,0 +1,56 @@
+export interface VehicleListing {
+  vehicle_id: string
+  registration_number: string
+  brand: string
+  vehicle_type: string | null
+  transmission: string | null
+  seating_capacity: number | null
+  fuel_type: string | null
+  district_name: string | null
+  city_name: string | null
+  rate_plan_name: string | null
+  rental_type: string | null
+  base_rate: number | null
+  base_kilometers: number | null
+  extra_rate_per_km: number | null
+  image_path: string | null
+  // resolved at fetch time
+  image_url?: string | null
+}
+
+export interface BookingFormData {
+  customer_name: string
+  customer_phone: string
+  customer_email: string
+  customer_license: string
+  start_date: string
+  start_time: string
+  return_date: string
+  return_time: string
+  with_driver: boolean
+  pickup_type: 'office' | 'delivery'
+  delivery_address: string
+  notes: string
+}
+
+export interface DistrictGroup {
+  district: string
+  vehicle_count: number
+  vehicle_types: string[]
+}
+
+export interface TenantListing {
+  tenant_id: string
+  name: string
+  logo_url: string | null
+  phone: string | null
+  district_name: string | null
+  vehicle_count: number
+  vehicle_types: string[] | null
+  joined_at: string
+}
+
+export interface TenantDetail extends TenantListing {
+  email: string | null
+  address: string | null
+}
