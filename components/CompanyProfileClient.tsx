@@ -328,7 +328,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                       style={{
                         width: 44, height: 44, borderRadius: '50%',
                         background: 'linear-gradient(135deg, #dc2828, #d97706)',
-                        color: '#000', display: 'grid', placeItems: 'center',
+                        color: '#fff', display: 'grid', placeItems: 'center',
                         fontWeight: 800, fontSize: 14, flexShrink: 0,
                       }}
                     >
@@ -494,7 +494,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                   type="submit"
                   style={{
                     background: '#dc2828', borderRadius: 12, padding: '14px 24px',
-                    fontSize: 15, fontWeight: 700, color: '#000', border: 'none',
+                    fontSize: 15, fontWeight: 700, color: '#fff', border: 'none',
                     cursor: 'pointer', width: '100%',
                   }}
                 >

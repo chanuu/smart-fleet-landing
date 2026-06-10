@@ -272,7 +272,7 @@ export default function Hero() {
               gap: 8,
               fontWeight: 700,
               fontSize: 14,
-              color: '#000',
+              color: '#fff',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               transition: 'background 0.15s',

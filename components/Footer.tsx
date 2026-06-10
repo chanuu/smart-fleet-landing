@@ -59,7 +59,7 @@ export default function Footer() {
                   justifyContent: 'center',
                   fontWeight: 800,
                   fontSize: 18,
-                  color: '#000',
+                  color: '#fff',
                 }}
               >
                 D

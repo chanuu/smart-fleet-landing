@@ -322,7 +322,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
                     borderRadius: 10,
                     border: 'none',
                     background: submitting ? 'rgba(220,40,40,0.5)' : '#dc2828',
-                    color: '#000',
+                    color: '#fff',
                     fontSize: 14,
                     fontWeight: 700,
                     cursor: submitting ? 'not-allowed' : 'pointer',
@@ -537,7 +537,7 @@ function Step2({
                   transition: 'all 0.15s',
                 }}
               >
-                {active && <CheckIcon size={11} style={{ color: '#000' }} />}
+                {active && <CheckIcon size={11} style={{ color: '#fff' }} />}
               </div>
             </button>
           )

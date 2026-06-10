@@ -118,7 +118,7 @@ export default function TopNav() {
               fontSize: 14,
               fontWeight: 600,
               textDecoration: 'none',
-              color: '#000',
+              color: '#fff',
               background: '#dc2828',
               transition: 'all 0.15s',
             }}
@@ -200,7 +200,7 @@ export default function TopNav() {
                 fontSize: 14,
                 fontWeight: 600,
                 textDecoration: 'none',
-                color: '#000',
+                color: '#fff',
                 background: '#dc2828',
                 textAlign: 'center',
               }}

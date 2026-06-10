@@ -360,7 +360,7 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
                 padding: '14px',
                 fontSize: 15,
                 fontWeight: 700,
-                color: '#000',
+                color: '#fff',
                 cursor: submitting ? 'not-allowed' : 'pointer',
                 transition: 'background 0.15s',
               }}
