@@ -46,8 +46,8 @@ export default function TopNav() {
             src="/logo.png"
             alt="RentCar Tours"
             width={220}
-            height={64}
-            style={{ objectFit: 'contain', height: 64, width: 220 }}
+            height={84}
+            style={{ objectFit: 'contain', height: 84, width: 220 }}
             priority
           />
         </Link>

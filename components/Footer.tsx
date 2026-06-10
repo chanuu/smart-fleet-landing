@@ -8,7 +8,7 @@ const FOOTER_LINKS = {
     { label: 'Pricing', href: '/browse' },
   ],
   Company: [
-    { label: 'About DriveLanka', href: '#' },
+    { label: 'About Rent Car Tours', href: '#' },
     { label: 'Partner with Us', href: '#' },
     { label: 'Careers', href: '#' },
     { label: 'Press', href: '#' },
@@ -146,7 +146,7 @@ export default function Footer() {
             }}
           >
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.24)' }}>
-              © {new Date().getFullYear()} DriveLanka. All rights reserved.
+              © {new Date().getFullYear()} Rent Car Tours. All rights reserved.
             </p>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.24)' }}>
               Made with care in Sri Lanka 🇱🇰

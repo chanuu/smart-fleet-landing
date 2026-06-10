@@ -59,10 +59,10 @@ async function getTenantData(tenantId: string): Promise<{ tenant: TenantDetail; 
 export async function generateMetadata({ params }: { params: Promise<{ tenantId: string }> }): Promise<Metadata> {
   const { tenantId } = await params
   const result = await getTenantData(tenantId)
-  if (!result) return { title: 'Company Not Found — DriveLanka' }
+  if (!result) return { title: 'Company Not Found — Rent Car Tours' }
   const { tenant } = result
   return {
-    title: `${tenant.name} — DriveLanka`,
+    title: `${tenant.name} — Rent Car Tours`,
     description: `Rent a vehicle from ${tenant.name}${tenant.district_name ? ' in ' + tenant.district_name : ''}, Sri Lanka. ${tenant.vehicle_count} vehicles available.`,
   }
 }

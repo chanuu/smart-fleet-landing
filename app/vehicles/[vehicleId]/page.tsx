@@ -42,11 +42,11 @@ async function getVehicle(vehicleId: string): Promise<{ vehicle: VehicleListing;
 export async function generateMetadata({ params }: { params: Promise<{ vehicleId: string }> }): Promise<Metadata> {
   const { vehicleId } = await params
   const result = await getVehicle(vehicleId)
-  if (!result) return { title: 'Vehicle Not Found — DriveLanka' }
+  if (!result) return { title: 'Vehicle Not Found — Rent Car Tours' }
   const { vehicle } = result
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
   return {
-    title: `${displayName} — DriveLanka`,
+    title: `${displayName} — Rent Car Tours`,
     description: `Rent a ${vehicle.brand} in ${vehicle.district_name ?? 'Sri Lanka'}.${vehicle.base_rate ? ` From LKR ${vehicle.base_rate.toLocaleString()} per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}.` : ''}`,
   }
 }

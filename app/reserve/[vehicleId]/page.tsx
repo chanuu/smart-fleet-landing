@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
@@ -40,11 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { vehicleId } = await params
   const vehicle = await getVehicle(vehicleId)
   if (!vehicle) {
-    return { title: 'Vehicle Not Found — DriveLanka' }
+    return { title: 'Vehicle Not Found — Rent Car Tours' }
   }
   const name = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
   return {
-    title: `Reserve ${name} — DriveLanka`,
+    title: `Reserve ${name} — Rent Car Tours`,
     description: `Book the ${name} in ${vehicle.district_name ?? 'Sri Lanka'}. ${vehicle.base_rate ? `From LKR ${vehicle.base_rate.toLocaleString()} per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}.` : ''}`,
   }
 }

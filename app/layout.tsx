@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -9,7 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'DriveLanka — Premium Vehicle Rental Across Sri Lanka',
+  title: 'Rent Car Tours — Premium Vehicle Rental Across Sri Lanka',
   description:
     'Browse and book premium cars, SUVs, vans and more from verified rental partners across 25+ districts in Sri Lanka. Instant booking, transparent pricing, reliable fleet.',
   keywords: [
@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     'car hire Sri Lanka',
     'SUV rental Colombo',
     'rent a car Kandy',
-    'DriveLanka',
+    'Rent Car Tours',
     'fleet rental',
   ],
   openGraph: {
-    title: 'DriveLanka — Premium Vehicle Rental Across Sri Lanka',
+    title: 'Rent Car Tours — Premium Vehicle Rental Across Sri Lanka',
     description:
       'Browse and book premium vehicles from verified rental partners across Sri Lanka.',
     type: 'website',

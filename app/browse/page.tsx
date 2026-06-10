@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 
@@ -9,7 +9,7 @@ import BrowsePage from '@/components/BrowsePage'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: 'Browse Vehicles — DriveLanka',
+  title: 'Browse Vehicles — Rent Car Tours',
   description:
     'Search and filter thousands of rental vehicles across all districts in Sri Lanka. Find cars, SUVs, vans, and more from verified rental partners.',
 }

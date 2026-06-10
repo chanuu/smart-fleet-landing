@@ -20,7 +20,7 @@ const STEPS = [
     icon: <CarIcon size={28} />,
     title: 'Drive Away',
     description:
-      'Pick up your vehicle at the office or get it delivered to your door. Drive with confidence — every partner is verified by DriveLanka.',
+      'Pick up your vehicle at the office or get it delivered to your door. Drive with confidence — every partner is verified by Rent Car Tours.',
   },
 ]
 
