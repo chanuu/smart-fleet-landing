@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { TenantDetail, VehicleListing } from '@/types'
@@ -31,7 +31,7 @@ const RATING_DIST = [
 
 function StarRow({ filled }: { filled: boolean }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? '#f59e0b' : 'none'} stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? '#dc2828' : 'none'} stroke="#dc2828" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
   )
@@ -79,10 +79,10 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                 marginRight: 32,
                 fontSize: 14,
                 fontWeight: 600,
-                color: tab === t.id ? '#f59e0b' : 'rgba(255,255,255,0.45)',
+                color: tab === t.id ? '#dc2828' : 'rgba(255,255,255,0.45)',
                 background: 'none',
                 border: 'none',
-                borderBottom: tab === t.id ? '2px solid #f59e0b' : '2px solid transparent',
+                borderBottom: tab === t.id ? '2px solid #dc2828' : '2px solid transparent',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'color 0.15s',
@@ -95,7 +95,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
               {t.badge !== undefined && (
                 <span
                   style={{
-                    background: tab === t.id ? '#f59e0b' : 'rgba(255,255,255,0.08)',
+                    background: tab === t.id ? '#dc2828' : 'rgba(255,255,255,0.08)',
                     color: tab === t.id ? '#000' : 'rgba(255,255,255,0.4)',
                     fontSize: 11,
                     fontWeight: 700,
@@ -136,9 +136,9 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: 'pointer',
-                      border: `1px solid ${activeType === type ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                      background: activeType === type ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.03)',
-                      color: activeType === type ? '#f59e0b' : 'rgba(255,255,255,0.62)',
+                      border: `1px solid ${activeType === type ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                      background: activeType === type ? 'rgba(220,40,40,0.12)' : 'rgba(255,255,255,0.03)',
+                      color: activeType === type ? '#dc2828' : 'rgba(255,255,255,0.62)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -207,7 +207,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                       style={{
                         width: 36,
                         height: 36,
-                        background: 'rgba(245,158,11,0.12)',
+                        background: 'rgba(220,40,40,0.12)',
                         borderRadius: 10,
                         display: 'flex',
                         alignItems: 'center',
@@ -238,7 +238,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                         <div key={type} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 36px', gap: 16, alignItems: 'center' }}>
                           <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{type}</div>
                           <div style={{ height: 8, background: 'rgba(255,255,255,0.07)', borderRadius: 999, overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #d97706 0%, #f59e0b 100%)', borderRadius: 999 }} />
+                            <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #d97706 0%, #dc2828 100%)', borderRadius: 999 }} />
                           </div>
                           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', fontWeight: 700, textAlign: 'right' }}>{count}</div>
                         </div>
@@ -264,7 +264,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                   ].map((row) => (
                     <div key={row.day} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, paddingTop: row.amber ? 10 : 0, borderTop: row.amber ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
                       <span style={{ color: 'rgba(255,255,255,0.45)' }}>{row.day}</span>
-                      <b style={{ fontWeight: 700, color: row.amber ? '#f59e0b' : '#fff' }}>{row.hours}</b>
+                      <b style={{ fontWeight: 700, color: row.amber ? '#dc2828' : '#fff' }}>{row.hours}</b>
                     </div>
                   ))}
                 </div>
@@ -282,7 +282,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                     'Free cancellation 24h before',
                   ].map((p) => (
                     <div key={p} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
-                      <span style={{ color: '#f59e0b', flexShrink: 0 }}>✓</span>
+                      <span style={{ color: '#dc2828', flexShrink: 0 }}>✓</span>
                       {p}
                     </div>
                   ))}
@@ -300,7 +300,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
             {/* Score summary */}
             <div style={{ position: 'sticky', top: 140 }}>
               <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '32px 24px', textAlign: 'center', marginBottom: 14 }}>
-                <div style={{ fontSize: 64, fontWeight: 800, color: '#f59e0b', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 8 }}>{rating}</div>
+                <div style={{ fontSize: 64, fontWeight: 800, color: '#dc2828', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 8 }}>{rating}</div>
                 <div style={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 8 }}>
                   {[1, 2, 3, 4, 5].map((s) => <StarRow key={s} filled={s <= Math.round(parseFloat(rating))} />)}
                 </div>
@@ -311,7 +311,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                   <div key={r.stars} style={{ display: 'grid', gridTemplateColumns: '32px 1fr 36px', gap: 12, alignItems: 'center', fontSize: 13 }}>
                     <span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>{r.stars} ★</span>
                     <div style={{ height: 6, background: 'rgba(255,255,255,0.07)', borderRadius: 999, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${r.pct}%`, background: '#f59e0b', borderRadius: 999 }} />
+                      <div style={{ height: '100%', width: `${r.pct}%`, background: '#dc2828', borderRadius: 999 }} />
                     </div>
                     <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 600, textAlign: 'right' }}>{r.pct}%</span>
                   </div>
@@ -327,7 +327,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                     <div
                       style={{
                         width: 44, height: 44, borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        background: 'linear-gradient(135deg, #dc2828, #d97706)',
                         color: '#000', display: 'grid', placeItems: 'center',
                         fontWeight: 800, fontSize: 14, flexShrink: 0,
                       }}
@@ -414,10 +414,10 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                     <div
                       style={{
                         width: 42, height: 42,
-                        background: 'rgba(245,158,11,0.12)',
+                        background: 'rgba(220,40,40,0.12)',
                         borderRadius: 11,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#f59e0b', flexShrink: 0,
+                        color: '#dc2828', flexShrink: 0,
                       }}
                     >
                       {it.icon}
@@ -493,7 +493,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                 <button
                   type="submit"
                   style={{
-                    background: '#f59e0b', borderRadius: 12, padding: '14px 24px',
+                    background: '#dc2828', borderRadius: 12, padding: '14px 24px',
                     fontSize: 15, fontWeight: 700, color: '#000', border: 'none',
                     cursor: 'pointer', width: '100%',
                   }}

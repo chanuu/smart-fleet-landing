@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -97,8 +97,8 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
             position: 'absolute',
             inset: 0,
             background: `
-              radial-gradient(ellipse 800px 300px at 30% 50%, rgba(245,158,11,0.12), transparent 60%),
-              radial-gradient(ellipse 600px 240px at 80% 20%, rgba(245,158,11,0.06), transparent 60%),
+              radial-gradient(ellipse 800px 300px at 30% 50%, rgba(220,40,40,0.12), transparent 60%),
+              radial-gradient(ellipse 600px 240px at 80% 20%, rgba(220,40,40,0.06), transparent 60%),
               linear-gradient(180deg, #131313 0%, #0a0a0a 100%)
             `,
           }}
@@ -156,14 +156,14 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                   width: 110,
                   height: 110,
                   borderRadius: 22,
-                  background: '#f59e0b',
+                  background: '#dc2828',
                   display: 'grid',
                   placeItems: 'center',
-                  color: '#000',
+                  color: '#fff',
                   fontWeight: 800,
                   fontSize: 42,
                   letterSpacing: '-0.03em',
-                  boxShadow: '0 12px 36px rgba(245,158,11,0.25)',
+                  boxShadow: '0 12px 36px rgba(220,40,40,0.25)',
                   flexShrink: 0,
                 }}
               >
@@ -187,17 +187,17 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                   }}
                 >
                   {tenant.name}
-                  <ShieldCheckIcon size={28} style={{ color: '#f59e0b' }} />
+                  <ShieldCheckIcon size={28} style={{ color: '#dc2828' }} />
                 </h1>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {[
                     {
-                      icon: <StarIcon size={13} style={{ color: '#f59e0b' }} />,
+                      icon: <StarIcon size={13} style={{ color: '#dc2828' }} />,
                       content: <><b style={{ color: '#fff', fontWeight: 700 }}>{rating}</b> ({reviews.toLocaleString()})</>,
                     },
                     {
                       icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#f59e0b' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
                           <path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/>
                           <circle cx="12" cy="10" r="3"/>
                         </svg>
@@ -206,7 +206,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                     },
                     {
                       icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#f59e0b' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
                           <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
                         </svg>
                       ),
@@ -214,7 +214,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                     },
                     {
                       icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#f59e0b' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
                           <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/>
                         </svg>
                       ),
@@ -266,7 +266,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700,
-                    background: '#f59e0b', color: '#000', textDecoration: 'none',
+                    background: '#dc2828', color: '#fff', textDecoration: 'none',
                   }}
                 >
                   Message →
@@ -290,7 +290,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                     borderRight: idx < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   }}
                 >
-                  <div style={{ fontSize: 28, fontWeight: 800, color: s.amber ? '#f59e0b' : '#fff', letterSpacing: '-0.02em' }}>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: s.amber ? '#dc2828' : '#fff', letterSpacing: '-0.02em' }}>
                     {s.num}
                   </div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{s.label}</div>

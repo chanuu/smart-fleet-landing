@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -161,8 +161,8 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
             {/* Vehicle summary */}
             <div
               style={{
-                background: 'rgba(245,158,11,0.06)',
-                border: '1px solid rgba(245,158,11,0.2)',
+                background: 'rgba(220,40,40,0.06)',
+                border: '1px solid rgba(220,40,40,0.2)',
                 borderRadius: 12,
                 padding: '14px 16px',
                 marginBottom: 24,
@@ -179,7 +179,7 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
               </div>
               {vehicle.base_rate && (
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 17, fontWeight: 800, color: '#f59e0b' }}>
+                  <div style={{ fontSize: 17, fontWeight: 800, color: '#dc2828' }}>
                     LKR {vehicle.base_rate.toLocaleString()}
                   </div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)' }}>
@@ -244,9 +244,9 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
                       flex: 1,
                       padding: '10px',
                       borderRadius: 8,
-                      border: `1px solid ${form.pickup_type === type ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                      background: form.pickup_type === type ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.03)',
-                      color: form.pickup_type === type ? '#f59e0b' : 'rgba(255,255,255,0.62)',
+                      border: `1px solid ${form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                      background: form.pickup_type === type ? 'rgba(220,40,40,0.08)' : 'rgba(255,255,255,0.03)',
+                      color: form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.62)',
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -354,7 +354,7 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
               disabled={submitting}
               style={{
                 width: '100%',
-                background: submitting ? 'rgba(245,158,11,0.5)' : '#f59e0b',
+                background: submitting ? 'rgba(220,40,40,0.5)' : '#dc2828',
                 border: 'none',
                 borderRadius: 10,
                 padding: '14px',
@@ -385,14 +385,14 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
         style={{
           width: 72,
           height: 72,
-          background: 'rgba(245,158,11,0.12)',
-          border: '2px solid rgba(245,158,11,0.4)',
+          background: 'rgba(220,40,40,0.12)',
+          border: '2px solid rgba(220,40,40,0.4)',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 20px',
-          color: '#f59e0b',
+          color: '#dc2828',
         }}
       >
         <CheckCircleIcon size={36} />
@@ -406,13 +406,13 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
       <button
         onClick={onClose}
         style={{
-          background: '#f59e0b',
+          background: '#dc2828',
           border: 'none',
           borderRadius: 10,
           padding: '12px 36px',
           fontSize: 14,
           fontWeight: 700,
-          color: '#000',
+          color: '#fff',
           cursor: 'pointer',
         }}
       >
@@ -426,7 +426,7 @@ function Field({ label, icon, children }: { label: string; icon: React.ReactNode
   return (
     <div>
       <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 5 }}>
-        <span style={{ color: '#f59e0b' }}>{icon}</span>
+        <span style={{ color: '#dc2828' }}>{icon}</span>
         {label}
       </label>
       {children}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -304,8 +304,8 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
                     padding: '12px 28px',
                     borderRadius: 10,
                     border: 'none',
-                    background: '#f59e0b',
-                    color: '#000',
+                    background: '#dc2828',
+                    color: '#fff',
                     fontSize: 14,
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -321,7 +321,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
                     padding: '12px 28px',
                     borderRadius: 10,
                     border: 'none',
-                    background: submitting ? 'rgba(245,158,11,0.5)' : '#f59e0b',
+                    background: submitting ? 'rgba(220,40,40,0.5)' : '#dc2828',
                     color: '#000',
                     fontSize: 14,
                     fontWeight: 700,
@@ -418,9 +418,9 @@ function Step1({
                 flex: 1,
                 padding: '11px',
                 borderRadius: 8,
-                border: `1px solid ${form.pickup_type === type ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: form.pickup_type === type ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.03)',
-                color: form.pickup_type === type ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: form.pickup_type === type ? 'rgba(220,40,40,0.08)' : 'rgba(255,255,255,0.03)',
+                color: form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -500,8 +500,8 @@ function Step2({
                 gap: 16,
                 padding: '16px',
                 borderRadius: 12,
-                border: `1px solid ${active ? '#f59e0b' : 'rgba(255,255,255,0.08)'}`,
-                background: active ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${active ? '#dc2828' : 'rgba(255,255,255,0.08)'}`,
+                background: active ? 'rgba(220,40,40,0.06)' : 'rgba(255,255,255,0.02)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s',
@@ -510,13 +510,13 @@ function Step2({
             >
               <span style={{ fontSize: 28, flexShrink: 0 }}>{addon.icon}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#f59e0b' : '#fff', marginBottom: 3 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#dc2828' : '#fff', marginBottom: 3 }}>
                   {addon.label}
                 </div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)' }}>{addon.desc}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#f59e0b' : 'rgba(255,255,255,0.5)' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#dc2828' : 'rgba(255,255,255,0.5)' }}>
                   +LKR {addon.price.toLocaleString()}/day
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>
@@ -528,8 +528,8 @@ function Step2({
                   width: 20,
                   height: 20,
                   borderRadius: 5,
-                  border: `2px solid ${active ? '#f59e0b' : 'rgba(255,255,255,0.16)'}`,
-                  background: active ? '#f59e0b' : 'transparent',
+                  border: `2px solid ${active ? '#dc2828' : 'rgba(255,255,255,0.16)'}`,
+                  background: active ? '#dc2828' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -674,9 +674,9 @@ function Step4({
                 flex: 1,
                 padding: '14px 12px',
                 borderRadius: 10,
-                border: `1px solid ${form.payment_method === opt.value ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: form.payment_method === opt.value ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.02)',
-                color: form.payment_method === opt.value ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${form.payment_method === opt.value ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: form.payment_method === opt.value ? 'rgba(220,40,40,0.08)' : 'rgba(255,255,255,0.02)',
+                color: form.payment_method === opt.value ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 display: 'flex',
@@ -710,15 +710,15 @@ function Step4({
         style={{
           marginTop: 20,
           padding: '14px 16px',
-          background: 'rgba(245,158,11,0.06)',
-          border: '1px solid rgba(245,158,11,0.2)',
+          background: 'rgba(220,40,40,0.06)',
+          border: '1px solid rgba(220,40,40,0.2)',
           borderRadius: 10,
           fontSize: 13,
           color: 'rgba(255,255,255,0.62)',
           lineHeight: 1.6,
         }}
       >
-        <strong style={{ color: '#f59e0b' }}>Estimated Total: LKR {grandTotal.toLocaleString()}</strong>
+        <strong style={{ color: '#dc2828' }}>Estimated Total: LKR {grandTotal.toLocaleString()}</strong>
         <br />
         Submitting this form sends a booking request. The rental partner will confirm within 24 hours.
       </div>
@@ -763,14 +763,14 @@ function SuccessScreen({
           style={{
             width: 80,
             height: 80,
-            background: 'rgba(245,158,11,0.12)',
-            border: '2px solid rgba(245,158,11,0.4)',
+            background: 'rgba(220,40,40,0.12)',
+            border: '2px solid rgba(220,40,40,0.4)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 24px',
-            color: '#f59e0b',
+            color: '#dc2828',
           }}
         >
           <CheckCircleIcon size={40} />
@@ -780,7 +780,7 @@ function SuccessScreen({
         </h2>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 28 }}>
           Your request for <strong style={{ color: '#fff' }}>{displayName}</strong> ({rentalDays} day{rentalDays !== 1 ? 's' : ''}) totalling{' '}
-          <strong style={{ color: '#f59e0b' }}>LKR {total.toLocaleString()}</strong> has been submitted.
+          <strong style={{ color: '#dc2828' }}>LKR {total.toLocaleString()}</strong> has been submitted.
           The rental partner will contact you within 24 hours.
         </p>
 
@@ -807,8 +807,8 @@ function SuccessScreen({
               flex: 1,
               padding: '12px',
               borderRadius: 10,
-              background: '#f59e0b',
-              color: '#000',
+              background: '#dc2828',
+              color: '#fff',
               textDecoration: 'none',
               fontSize: 14,
               fontWeight: 700,
@@ -922,7 +922,7 @@ function VehicleSummaryCard({
               borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none',
             }}
           >
-            <span style={{ color: '#f59e0b' }}>{spec.icon}</span>
+            <span style={{ color: '#dc2828' }}>{spec.icon}</span>
             <span style={{ textTransform: 'capitalize' }}>{spec.label}</span>
           </div>
         ))}
@@ -954,7 +954,7 @@ function VehicleSummaryCard({
           }}
         >
           <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Estimated Total</span>
-          <span style={{ fontSize: 19, fontWeight: 800, color: '#f59e0b' }}>
+          <span style={{ fontSize: 19, fontWeight: 800, color: '#dc2828' }}>
             LKR {grandTotal.toLocaleString()}
           </span>
         </div>
@@ -988,7 +988,7 @@ function Field({ label, icon, children }: { label: string; icon?: React.ReactNod
   return (
     <div>
       <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 5 }}>
-        {icon && <span style={{ color: '#f59e0b' }}>{icon}</span>}
+        {icon && <span style={{ color: '#dc2828' }}>{icon}</span>}
         {label}
       </label>
       {children}

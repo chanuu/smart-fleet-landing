@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -103,7 +103,7 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
                 borderRadius: 10,
                 overflow: 'hidden',
                 border: i === active
-                  ? '2px solid #f59e0b'
+                  ? '2px solid #dc2828'
                   : '2px solid rgba(255,255,255,0.08)',
                 padding: 0,
                 cursor: 'pointer',

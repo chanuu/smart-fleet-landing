@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -78,14 +78,14 @@ export default function Hero() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            background: 'rgba(245,158,11,0.12)',
-            border: '1px solid rgba(245,158,11,0.3)',
+            background: 'rgba(220,40,40,0.12)',
+            border: '1px solid rgba(220,40,40,0.3)',
             borderRadius: 999,
             padding: '6px 16px',
             marginBottom: 24,
           }}
         >
-          <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: 12, color: '#dc2828', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Sri Lanka&apos;s Premier Rental Marketplace
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function Hero() {
         >
           Drive Anywhere
           <br />
-          <span style={{ color: '#f59e0b' }}>Across Sri Lanka</span>
+          <span style={{ color: '#dc2828' }}>Across Sri Lanka</span>
         </h1>
 
         {/* Sub-headline */}
@@ -147,7 +147,7 @@ export default function Hero() {
                 left: 12,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#f59e0b',
+                color: '#dc2828',
                 pointerEvents: 'none',
               }}
             />
@@ -263,7 +263,7 @@ export default function Hero() {
           <button
             onClick={handleSearch}
             style={{
-              background: '#f59e0b',
+              background: '#dc2828',
               border: 'none',
               borderRadius: 10,
               padding: '12px 24px',

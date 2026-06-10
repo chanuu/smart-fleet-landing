@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -121,13 +121,13 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
           )}
           <span
             style={{
-              background: 'rgba(245,158,11,0.15)',
-              border: '1px solid rgba(245,158,11,0.4)',
+              background: 'rgba(220,40,40,0.15)',
+              border: '1px solid rgba(220,40,40,0.4)',
               borderRadius: 6,
               padding: '3px 10px',
               fontSize: 11,
               fontWeight: 600,
-              color: '#f59e0b',
+              color: '#dc2828',
               display: 'flex',
               alignItems: 'center',
               gap: 4,
@@ -155,7 +155,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: favorited ? '#f59e0b' : 'rgba(255,255,255,0.6)',
+            color: favorited ? '#dc2828' : 'rgba(255,255,255,0.6)',
             backdropFilter: 'blur(8px)',
             transition: 'color 0.15s',
           }}
@@ -163,7 +163,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
         >
           <HeartIcon
             size={16}
-            style={{ fill: favorited ? '#f59e0b' : 'none' }}
+            style={{ fill: favorited ? '#dc2828' : 'none' }}
           />
         </button>
       </div>
@@ -225,7 +225,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
               style={{
                 fontSize: 18,
                 fontWeight: 800,
-                color: '#f59e0b',
+                color: '#dc2828',
                 letterSpacing: '-0.02em',
               }}
             >
@@ -240,12 +240,12 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             href={`/reserve/${vehicle.vehicle_id}`}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#f59e0b',
+              background: '#dc2828',
               borderRadius: 8,
               padding: '9px 18px',
               fontSize: 13,
               fontWeight: 700,
-              color: '#000',
+              color: '#fff',
               textDecoration: 'none',
               display: 'inline-block',
               transition: 'background 0.15s',
@@ -262,7 +262,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
 function SpecItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.62)', fontSize: 12 }}>
-      <span style={{ color: '#f59e0b', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: '#dc2828', flexShrink: 0 }}>{icon}</span>
       {label}
     </div>
   )

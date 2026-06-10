@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 
 const FOOTER_LINKS = {
   Explore: [
@@ -52,7 +52,7 @@ export default function Footer() {
                 style={{
                   width: 32,
                   height: 32,
-                  background: '#f59e0b',
+                  background: '#dc2828',
                   borderRadius: 6,
                   display: 'flex',
                   alignItems: 'center',
@@ -65,7 +65,7 @@ export default function Footer() {
                 D
               </div>
               <span style={{ fontWeight: 700, fontSize: 17, color: '#fff' }}>
-                Drive<span style={{ color: '#f59e0b' }}>Lanka</span>
+                Drive<span style={{ color: '#dc2828' }}>Lanka</span>
               </span>
             </Link>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', lineHeight: 1.7, maxWidth: 240 }}>

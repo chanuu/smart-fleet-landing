@@ -1,6 +1,7 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { XIcon, FilterIcon } from './Icons'
@@ -40,27 +41,15 @@ export default function TopNav() {
         }}
       >
         {/* Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              background: '#f59e0b',
-              borderRadius: 6,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: 18,
-              color: '#000',
-              letterSpacing: '-1px',
-            }}
-          >
-            D
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 18, color: '#fff', letterSpacing: '-0.3px' }}>
-            Drive<span style={{ color: '#f59e0b' }}>Lanka</span>
-          </span>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+          <Image
+            src="/logo.png"
+            alt="RentCar Tours"
+            width={220}
+            height={64}
+            style={{ objectFit: 'contain', height: 64, width: 220 }}
+            priority
+          />
         </Link>
 
         {/* Center nav links - hidden on small screens */}
@@ -86,11 +75,11 @@ export default function TopNav() {
                 textDecoration: 'none',
                 color:
                   pathname === link.href
-                    ? '#f59e0b'
+                    ? '#dc2828'
                     : 'rgba(255,255,255,0.62)',
                 background:
                   pathname === link.href
-                    ? 'rgba(245,158,11,0.08)'
+                    ? 'rgba(220,40,40,0.08)'
                     : 'transparent',
                 transition: 'all 0.15s',
               }}
@@ -130,7 +119,7 @@ export default function TopNav() {
               fontWeight: 600,
               textDecoration: 'none',
               color: '#000',
-              background: '#f59e0b',
+              background: '#dc2828',
               transition: 'all 0.15s',
             }}
           >
@@ -176,7 +165,7 @@ export default function TopNav() {
                 fontSize: 15,
                 fontWeight: 500,
                 textDecoration: 'none',
-                color: pathname === link.href ? '#f59e0b' : 'rgba(255,255,255,0.8)',
+                color: pathname === link.href ? '#dc2828' : 'rgba(255,255,255,0.8)',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
               }}
             >
@@ -212,7 +201,7 @@ export default function TopNav() {
                 fontWeight: 600,
                 textDecoration: 'none',
                 color: '#000',
-                background: '#f59e0b',
+                background: '#dc2828',
                 textAlign: 'center',
               }}
             >

@@ -1,4 +1,4 @@
-import { SearchIcon, CheckCircleIcon, CarIcon } from './Icons'
+﻿import { SearchIcon, CheckCircleIcon, CarIcon } from './Icons'
 
 const STEPS = [
   {
@@ -43,7 +43,7 @@ export default function HowItWorks() {
       >
         {/* Heading */}
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#dc2828', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
             Simple Process
           </p>
           <h2
@@ -105,13 +105,13 @@ export default function HowItWorks() {
                 style={{
                   width: 56,
                   height: 56,
-                  background: 'rgba(245,158,11,0.1)',
-                  border: '1px solid rgba(245,158,11,0.25)',
+                  background: 'rgba(220,40,40,0.1)',
+                  border: '1px solid rgba(220,40,40,0.25)',
                   borderRadius: 14,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#f59e0b',
+                  color: '#dc2828',
                   marginBottom: 20,
                 }}
               >
@@ -123,13 +123,13 @@ export default function HowItWorks() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  background: 'rgba(245,158,11,0.12)',
-                  border: '1px solid rgba(245,158,11,0.25)',
+                  background: 'rgba(220,40,40,0.12)',
+                  border: '1px solid rgba(220,40,40,0.25)',
                   borderRadius: 6,
                   padding: '3px 10px',
                   fontSize: 11,
                   fontWeight: 700,
-                  color: '#f59e0b',
+                  color: '#dc2828',
                   letterSpacing: '0.05em',
                   marginBottom: 12,
                 }}

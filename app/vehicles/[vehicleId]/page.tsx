@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -99,7 +99,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                   {vehicle.vehicle_type}
                 </span>
               )}
-              <span style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>
+              <span style={{ background: 'rgba(220,40,40,0.12)', border: '1px solid rgba(220,40,40,0.35)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#dc2828' }}>
                 ✓ Verified
               </span>
             </div>
@@ -157,7 +157,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                     )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', letterSpacing: '-0.02em' }}>
+                    <span style={{ fontSize: 28, fontWeight: 800, color: '#dc2828', letterSpacing: '-0.02em' }}>
                       LKR {vehicle.base_rate.toLocaleString()}
                     </span>
                     <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', marginLeft: 4 }}>{priceLabel}</span>
@@ -174,7 +174,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 4 }}>Starting from</div>
                 {vehicle.base_rate !== null ? (
                   <>
-                    <span style={{ fontSize: 32, fontWeight: 800, color: '#f59e0b', letterSpacing: '-0.02em' }}>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: '#dc2828', letterSpacing: '-0.02em' }}>
                       LKR {vehicle.base_rate.toLocaleString()}
                     </span>
                     <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.38)', marginLeft: 4 }}>{priceLabel}</span>
@@ -204,9 +204,9 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
                 href={`/reserve/${vehicle.vehicle_id}`}
                 style={{
                   display: 'block', textAlign: 'center',
-                  background: '#f59e0b', borderRadius: 12,
+                  background: '#dc2828', borderRadius: 12,
                   padding: '14px 24px', fontSize: 15, fontWeight: 700,
-                  color: '#000', textDecoration: 'none',
+                  color: '#fff', textDecoration: 'none',
                   transition: 'background 0.15s',
                 }}
               >

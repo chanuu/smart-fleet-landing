@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -103,9 +103,9 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
-                border: `1px solid ${filterType === t ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: filterType === t ? 'rgba(245,158,11,0.12)' : 'transparent',
-                color: filterType === t ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${filterType === t ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: filterType === t ? 'rgba(220,40,40,0.12)' : 'transparent',
+                color: filterType === t ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 transition: 'all 0.15s',
               }}
             >
@@ -129,9 +129,9 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
-                border: `1px solid ${filterTransmission === t ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: filterTransmission === t ? 'rgba(245,158,11,0.10)' : 'transparent',
-                color: filterTransmission === t ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${filterTransmission === t ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: filterTransmission === t ? 'rgba(220,40,40,0.10)' : 'transparent',
+                color: filterTransmission === t ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 textTransform: 'capitalize',
                 transition: 'all 0.15s',
               }}
@@ -156,9 +156,9 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
-                border: `1px solid ${filterFuel === f ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: filterFuel === f ? 'rgba(245,158,11,0.10)' : 'transparent',
-                color: filterFuel === f ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${filterFuel === f ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: filterFuel === f ? 'rgba(220,40,40,0.10)' : 'transparent',
+                color: filterFuel === f ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 textTransform: 'capitalize',
                 transition: 'all 0.15s',
               }}
@@ -182,9 +182,9 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
-                border: `1px solid ${filterSeats === s ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-                background: filterSeats === s ? 'rgba(245,158,11,0.10)' : 'transparent',
-                color: filterSeats === s ? '#f59e0b' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${filterSeats === s ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+                background: filterSeats === s ? 'rgba(220,40,40,0.10)' : 'transparent',
+                color: filterSeats === s ? '#dc2828' : 'rgba(255,255,255,0.5)',
                 transition: 'all 0.15s',
               }}
             >
@@ -252,7 +252,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
           <h1 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 20 }}>
             Browse Fleet
             {filterDistrict && (
-              <span style={{ color: '#f59e0b' }}> — {filterDistrict}</span>
+              <span style={{ color: '#dc2828' }}> — {filterDistrict}</span>
             )}
           </h1>
 
@@ -336,12 +336,12 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
             {activeFilterCount > 0 && (
               <span
                 style={{
-                  background: '#f59e0b',
+                  background: '#dc2828',
                   borderRadius: 999,
                   padding: '2px 8px',
                   fontSize: 11,
                   fontWeight: 700,
-                  color: '#000',
+                  color: '#fff',
                 }}
               >
                 {activeFilterCount}
@@ -398,12 +398,12 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 onClick={clearFilters}
                 style={{
                   padding: '10px 24px',
-                  background: '#f59e0b',
+                  background: '#dc2828',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 14,
                   fontWeight: 700,
-                  color: '#000',
+                  color: '#fff',
                   cursor: 'pointer',
                 }}
               >
@@ -482,12 +482,12 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
                 width: '100%',
                 marginTop: 24,
                 padding: '13px',
-                background: '#f59e0b',
+                background: '#dc2828',
                 border: 'none',
                 borderRadius: 10,
                 fontSize: 14,
                 fontWeight: 700,
-                color: '#000',
+                color: '#fff',
                 cursor: 'pointer',
               }}
             >

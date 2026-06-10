@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import type { TenantListing } from '@/types'
 import { ShieldCheckIcon, StarIcon } from './Icons'
 
@@ -7,7 +7,7 @@ interface PartnersSectionProps {
 }
 
 const ACCENT_COLORS = [
-  '#f59e0b', '#60a5fa', '#34d399', '#f87171',
+  '#dc2828', '#60a5fa', '#34d399', '#f87171',
   '#a78bfa', '#fb923c', '#2dd4bf', '#e879f9',
 ]
 
@@ -56,7 +56,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
       >
         {/* Heading */}
         <div style={{ marginBottom: 48 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#dc2828', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
             Premium Partners
           </p>
           <div
@@ -156,7 +156,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                       >
                         {tenant.name}
                       </span>
-                      <ShieldCheckIcon size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                      <ShieldCheckIcon size={14} style={{ color: '#dc2828', flexShrink: 0 }} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(255,255,255,0.38)', fontSize: 12 }}>
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -223,7 +223,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                 {/* Footer */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <StarIcon size={13} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+                    <StarIcon size={13} style={{ color: '#dc2828', fill: '#dc2828' }} />
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{stats.rating}</span>
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginLeft: 2 }}>
                       ({stats.reviews} reviews)
@@ -233,7 +233,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                     style={{
                       fontSize: 13,
                       fontWeight: 600,
-                      color: '#f59e0b',
+                      color: '#dc2828',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 3,

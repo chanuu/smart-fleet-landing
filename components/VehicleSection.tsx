@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { VehicleListing } from '@/types'
@@ -33,7 +33,7 @@ export default function VehicleSection({ vehicles }: VehicleSectionProps) {
     >
       {/* Heading */}
       <div style={{ marginBottom: 36 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: '#dc2828', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
           Explore Fleet
         </p>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
@@ -55,12 +55,12 @@ export default function VehicleSection({ vehicles }: VehicleSectionProps) {
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: '#f59e0b',
+              color: '#dc2828',
               textDecoration: 'none',
               display: 'flex',
               alignItems: 'center',
               gap: 4,
-              borderBottom: '1px solid rgba(245,158,11,0.3)',
+              borderBottom: '1px solid rgba(220,40,40,0.3)',
               paddingBottom: 2,
             }}
           >
@@ -88,9 +88,9 @@ export default function VehicleSection({ vehicles }: VehicleSectionProps) {
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
-              border: `1px solid ${activeType === type ? '#f59e0b' : 'rgba(255,255,255,0.10)'}`,
-              background: activeType === type ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.03)',
-              color: activeType === type ? '#f59e0b' : 'rgba(255,255,255,0.62)',
+              border: `1px solid ${activeType === type ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
+              background: activeType === type ? 'rgba(220,40,40,0.12)' : 'rgba(255,255,255,0.03)',
+              color: activeType === type ? '#dc2828' : 'rgba(255,255,255,0.62)',
               transition: 'all 0.15s',
             }}
           >
