@@ -20,6 +20,7 @@ import {
   BanknoteIcon,
   CheckIcon,
 } from './Icons'
+import { useCustomerAuth } from '@/contexts/CustomerAuthContext'
 
 interface ReservePageProps {
   vehicle: VehicleListing
@@ -74,8 +75,19 @@ const ADDON_CHILD_SEAT_PRICE = 500
 const ADDON_GPS_PRICE = 300
 
 export default function ReservePage({ vehicle }: ReservePageProps) {
+  const { user } = useCustomerAuth()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<FormData>(initialForm)
+
+  // Pre-fill driver info from saved profile
+  useEffect(() => {
+    if (!user) return
+    setForm(prev => ({
+      ...prev,
+      customer_email:   prev.customer_email   || (user.email ?? ''),
+      customer_license: prev.customer_license || (user.user_metadata?.license_number ?? ''),
+    }))
+  }, [user])
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)

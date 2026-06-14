@@ -1,9 +1,10 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { VehicleListing } from '@/types'
 import { XIcon, CheckCircleIcon, CalendarIcon, PhoneIcon, MailIcon, IdCardIcon, MapPinIcon } from './Icons'
+import { useCustomerAuth } from '@/contexts/CustomerAuthContext'
 
 interface BookingModalProps {
   vehicle: VehicleListing
@@ -41,10 +42,23 @@ const initialForm: FormState = {
 }
 
 export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
+  const { user } = useCustomerAuth()
   const [form, setForm] = useState<FormState>(initialForm)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Pre-fill from saved profile when modal opens
+  useEffect(() => {
+    if (!user) return
+    setForm(prev => ({
+      ...prev,
+      customer_name:    prev.customer_name    || (user.user_metadata?.full_name ?? ''),
+      customer_phone:   prev.customer_phone   || (user.user_metadata?.phone ?? ''),
+      customer_email:   prev.customer_email   || (user.email ?? ''),
+      customer_license: prev.customer_license || (user.user_metadata?.license_number ?? ''),
+    }))
+  }, [user])
 
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
 
@@ -54,7 +68,7 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
     setError(null)
 
