@@ -164,6 +164,8 @@ interface RentalRecord {
   vehicle_brand: string | null
   vehicle_registration: string | null
   vehicle_type: string | null
+  total_kilometers: number | null
+  grand_total: number | null
 }
 
 // ---- Helpers ----
@@ -367,6 +369,8 @@ export default function MyBookingsPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px 20px' }}>
                         <InfoRow label="Start"  value={`${fmtDate(r.start_date)}${r.start_time ? ' ' + fmtTime(r.start_time) : ''}`} />
                         <InfoRow label="Return" value={r.expected_return_date ? `${fmtDate(r.expected_return_date)}${r.expected_return_time ? ' ' + fmtTime(r.expected_return_time) : ''}` : undefined} />
+                        {r.total_kilometers != null && <InfoRow label="Distance" value={`${r.total_kilometers.toLocaleString()} km`} />}
+                        {r.grand_total != null && <InfoRow label="Total Amount" value={`LKR ${Number(r.grand_total).toLocaleString()}`} />}
                         {r.with_driver && <InfoRow label="Driver" value="Included" />}
                         {r.booking_note && <InfoRow label="Note" value={r.booking_note} />}
                       </div>
