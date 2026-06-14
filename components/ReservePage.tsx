@@ -44,6 +44,7 @@ interface FormData {
   customer_phone: string
   customer_email: string
   customer_license: string
+  customer_address: string
   // Step 4
   payment_method: 'cash' | 'card'
   notes: string
@@ -63,6 +64,7 @@ const initialForm: FormData = {
   customer_phone: '',
   customer_email: '',
   customer_license: '',
+  customer_address: '',
   payment_method: 'cash',
   notes: '',
 }
@@ -99,7 +101,10 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   const grandTotal = baseTotal + driverTotal + childSeatTotal + gpsTotal + deliveryFee
 
   const set = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value
+    let value: string | boolean = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value
+    if (field === 'customer_license' && typeof value === 'string') {
+      value = value.replace(/\s/g, '').toUpperCase()
+    }
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -150,7 +155,13 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
         p_with_driver: form.with_driver,
         p_pickup_type: form.pickup_type,
         p_delivery_address: form.delivery_address.trim(),
-        p_notes: `${form.notes.trim()}${form.child_seat ? ' | Child seat requested' : ''}${form.gps_nav ? ' | GPS navigation requested' : ''}${form.payment_method === 'card' ? ' | Preferred payment: Card' : ' | Preferred payment: Cash'}`,
+        p_notes: [
+          form.customer_address.trim() ? `Address: ${form.customer_address.trim()}` : '',
+          form.notes.trim(),
+          form.child_seat ? 'Child seat requested' : '',
+          form.gps_nav ? 'GPS navigation requested' : '',
+          form.payment_method === 'card' ? 'Preferred payment: Card' : 'Preferred payment: Cash',
+        ].filter(Boolean).join(' | '),
       })
       if (rpcError) throw rpcError
       setSuccess(true)
@@ -595,7 +606,18 @@ function Step3({
               type="text"
               value={form.customer_license}
               onChange={set('customer_license')}
-              placeholder="Sri Lanka driving license number"
+              placeholder="e.g. B1234567"
+              style={inputStyle}
+            />
+          </Field>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Field label="Home Address" icon={<MapPinIcon size={13} />}>
+            <input
+              type="text"
+              value={form.customer_address}
+              onChange={set('customer_address')}
+              placeholder="Your full home address"
               style={inputStyle}
             />
           </Field>
@@ -641,6 +663,7 @@ function Step4({
           { label: 'Driver', value: form.with_driver ? 'Professional driver included' : 'Self-drive' },
           { label: 'Name', value: form.customer_name },
           { label: 'Phone', value: form.customer_phone },
+          { label: 'Address', value: form.customer_address },
         ].map((row) => (
           <div
             key={row.label}

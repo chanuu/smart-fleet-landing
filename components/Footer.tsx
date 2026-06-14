@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import Image from 'next/image'
 
 const FOOTER_LINKS = {
   Explore: [
@@ -47,26 +48,14 @@ export default function Footer() {
         >
           {/* Brand col */}
           <div style={{ gridColumn: 'span 1' }}>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  background: '#dc2828',
-                  borderRadius: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: 18,
-                  color: '#fff',
-                }}
-              >
-                D
-              </div>
-              <span style={{ fontWeight: 700, fontSize: 17, color: '#fff' }}>
-                Drive<span style={{ color: '#dc2828' }}>Lanka</span>
-              </span>
+            <Link href="/" style={{ display: 'inline-block', textDecoration: 'none', marginBottom: 16 }}>
+              <Image
+                src="/logo.png"
+                alt="Rent Car Tours"
+                width={180}
+                height={68}
+                style={{ objectFit: 'contain', width: 180, height: 68 }}
+              />
             </Link>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', lineHeight: 1.7, maxWidth: 240 }}>
               Sri Lanka&apos;s premier vehicle rental marketplace. Connect with verified partners across every district.

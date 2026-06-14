@@ -15,6 +15,7 @@ interface FormState {
   customer_phone: string
   customer_email: string
   customer_license: string
+  customer_address: string
   start_date: string
   start_time: string
   return_date: string
@@ -29,6 +30,7 @@ const initialForm: FormState = {
   customer_phone: '',
   customer_email: '',
   customer_license: '',
+  customer_address: '',
   start_date: '',
   start_time: '09:00',
   return_date: '',
@@ -47,7 +49,9 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
 
   const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }))
+    let value = e.target.value
+    if (field === 'customer_license') value = value.replace(/\s/g, '').toUpperCase()
+    setForm((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +78,10 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
         p_with_driver: false,
         p_pickup_type: form.pickup_type,
         p_delivery_address: form.delivery_address.trim(),
-        p_notes: form.notes.trim(),
+        p_notes: [
+          form.customer_address.trim() ? `Address: ${form.customer_address.trim()}` : '',
+          form.notes.trim(),
+        ].filter(Boolean).join(' | '),
       })
 
       if (rpcError) throw rpcError
@@ -310,10 +317,21 @@ export default function BookingModal({ vehicle, onClose }: BookingModalProps) {
                   type="text"
                   value={form.customer_license}
                   onChange={set('customer_license')}
-                  placeholder="Driving license no."
+                  placeholder="e.g. B1234567"
                   style={inputStyle}
                 />
               </Field>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Home Address" icon={<MapPinIcon size={14} />}>
+                  <input
+                    type="text"
+                    value={form.customer_address}
+                    onChange={set('customer_address')}
+                    placeholder="Your full home address"
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
             </div>
 
             {/* Notes */}
