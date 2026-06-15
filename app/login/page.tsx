@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   const reset = () => { setError(null); setSuccess(null) }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
     reset()
 
@@ -179,9 +179,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: 24, fontSize: 13, color: 'rgba(255,255,255,0.28)' }}>
-            <Link href="/" style={{ color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>← Back to home</Link>
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
+            <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>← Back to home</Link>
+            <a href="http://app.rentcartours.com/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>Staff Login →</a>
+          </div>
         </div>
       </div>
     </div>
