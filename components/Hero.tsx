@@ -102,9 +102,9 @@ export default function Hero() {
             marginBottom: 20,
           }}
         >
-          Drive Anywhere
+          Rent a Car
           <br />
-          <span style={{ color: '#dc2828' }}>Across Sri Lanka</span>
+          <span style={{ color: '#dc2828' }}>in Sri Lanka</span>
         </h1>
 
         {/* Sub-headline */}
@@ -117,8 +117,8 @@ export default function Hero() {
             marginBottom: 44,
           }}
         >
-          Browse 2,400+ verified vehicles from trusted partners in every district.
-          Book instantly, drive confidently.
+          Find affordable car rentals from verified partners across Colombo, Kandy, Galle and 25+ districts.
+          Self-drive or with driver — book online instantly.
         </p>
 
         {/* Search bar */}

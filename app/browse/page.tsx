@@ -9,9 +9,10 @@ import BrowsePage from '@/components/BrowsePage'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: 'Browse Vehicles — Rent Car Tours',
+  title: 'Rent a Car in Sri Lanka — Browse Cars, SUVs, Vans',
   description:
-    'Search and filter thousands of rental vehicles across all districts in Sri Lanka. Find cars, SUVs, vans, and more from verified rental partners.',
+    'Search and compare rental cars, SUVs, vans and luxury vehicles across Colombo, Kandy, Galle, Negombo and 25+ districts in Sri Lanka. Self-drive and with-driver options, transparent pricing.',
+  alternates: { canonical: 'https://www.rentcartours.com/browse' },
 }
 
 async function getVehicles(): Promise<VehicleListing[]> {

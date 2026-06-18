@@ -10,6 +10,56 @@ import Footer from '@/components/Footer'
 
 export const dynamic = 'force-dynamic'
 
+const SITE_URL = 'https://www.rentcartours.com'
+
+function JsonLd() {
+  const org = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Rent Car Tours',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: 'Sri Lanka\'s premier car rental marketplace connecting travellers with verified rental partners across 25+ districts.',
+    areaServed: { '@type': 'Country', name: 'Sri Lanka' },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      availableLanguage: ['English', 'Sinhala', 'Tamil'],
+    },
+  }
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Rent Car Tours',
+    url: SITE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/browse?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+  const service = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Car Rental',
+    provider: { '@type': 'Organization', name: 'Rent Car Tours' },
+    areaServed: { '@type': 'Country', name: 'Sri Lanka' },
+    description: 'Rent a car in Sri Lanka — self-drive and chauffeur-driven vehicles including cars, SUVs, vans and luxury vehicles across Colombo, Kandy, Galle, Negombo and more.',
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'LKR',
+      availability: 'https://schema.org/InStock',
+    },
+  }
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(service) }} />
+    </>
+  )
+}
+
 async function getVehicles(): Promise<VehicleListing[]> {
   try {
     const { data, error } = await supabase.rpc('get_public_vehicle_listings')
@@ -65,6 +115,7 @@ export default async function LandingPage() {
 
   return (
     <main style={{ background: '#0a0a0a' }}>
+      <JsonLd />
       <TopNav />
       <Hero />
       <Suspense fallback={<VehicleSectionFallback />}>

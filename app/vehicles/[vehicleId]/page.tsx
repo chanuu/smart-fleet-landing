@@ -45,9 +45,11 @@ export async function generateMetadata({ params }: { params: Promise<{ vehicleId
   if (!result) return { title: 'Vehicle Not Found — Rent Car Tours' }
   const { vehicle } = result
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
+  const location = vehicle.district_name ?? 'Sri Lanka'
   return {
-    title: `${displayName} — Rent Car Tours`,
-    description: `Rent a ${vehicle.brand} in ${vehicle.district_name ?? 'Sri Lanka'}.${vehicle.base_rate ? ` From LKR ${vehicle.base_rate.toLocaleString()} per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}.` : ''}`,
+    title: `Rent ${displayName} in ${location}`,
+    description: `Rent a ${displayName} in ${location}, Sri Lanka.${vehicle.base_rate ? ` From LKR ${vehicle.base_rate.toLocaleString()} per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}.` : ''} Verified rental partner, instant online booking, transparent pricing.`,
+    alternates: { canonical: `https://www.rentcartours.com/vehicles/${vehicleId}` },
   }
 }
 
