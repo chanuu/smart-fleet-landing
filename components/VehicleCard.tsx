@@ -5,16 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { VehicleListing } from '@/types'
 import { HeartIcon, UsersIcon, GaugeIcon, FuelIcon, MapPinIcon, ShieldCheckIcon } from './Icons'
-import { DEFAULT_VEHICLE_IMAGES } from '@/lib/data'
-
-function pickDefaultImage(vehicleId: string): string {
-  // Deterministic pick so the same vehicle always shows the same default photo
-  let hash = 0
-  for (let i = 0; i < vehicleId.length; i++) {
-    hash = (hash * 31 + vehicleId.charCodeAt(i)) >>> 0
-  }
-  return DEFAULT_VEHICLE_IMAGES[hash % DEFAULT_VEHICLE_IMAGES.length]
-}
 
 interface VehicleCardProps {
   vehicle: VehicleListing
@@ -24,12 +14,9 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
   const [favorited, setFavorited] = useState(false)
   const [imgError, setImgError] = useState(false)
 
-  // Use signed URL first; fall back to a deterministic default Unsplash photo
-  const imageSrc = (!imgError && vehicle.image_url)
-    ? vehicle.image_url
-    : pickDefaultImage(vehicle.vehicle_id)
+  const hasImage = !imgError && !!vehicle.image_url
 
-  const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
+  const displayName = `${vehicle.brand}${vehicle.model_name ? ' ' + vehicle.model_name : ''}`
   const priceLabel = vehicle.rental_type === 'monthly' ? '/mo' : '/day'
   const priceValue = vehicle.base_rate ? `LKR ${vehicle.base_rate.toLocaleString()}` : 'Contact'
   const location = [vehicle.city_name, vehicle.district_name].filter(Boolean).join(', ')
@@ -74,14 +61,29 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
           flexShrink: 0,
         }}
       >
-        <Image
-          src={imageSrc}
-          alt={displayName}
-          fill
-          style={{ objectFit: 'cover' }}
-          onError={() => setImgError(true)}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {hasImage ? (
+          <Image
+            src={vehicle.image_url!}
+            alt={displayName}
+            fill
+            style={{ objectFit: 'cover' }}
+            onError={() => setImgError(true)}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+              <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+              <path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2"/>
+              <path d="M9 17h6"/>
+              <path d="M14 7l-3-3"/>
+            </svg>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: '-0.01em', textAlign: 'center', padding: '0 16px' }}>
+              {displayName}
+            </span>
+          </div>
+        )}
 
         {/* Dark gradient overlay on image */}
         <div

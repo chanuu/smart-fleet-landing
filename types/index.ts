@@ -2,6 +2,7 @@ export interface VehicleListing {
   vehicle_id: string
   registration_number: string
   brand: string
+  model_name: string | null
   vehicle_type: string | null
   transmission: string | null
   seating_capacity: number | null
