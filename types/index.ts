@@ -50,7 +50,24 @@ export interface TenantListing {
   joined_at: string
 }
 
+export interface PublicProfile {
+  about?: string
+  tagline?: string
+  whatsapp?: string
+  opening_hours_weekday?: string
+  opening_hours_saturday?: string
+  opening_hours_sunday?: string
+  emergency_contact?: string
+  min_driver_age?: string
+  cancellation_hours?: string
+  policy_1?: string
+  policy_2?: string
+  policy_3?: string
+  policy_4?: string
+}
+
 export interface TenantDetail extends TenantListing {
   email: string | null
   address: string | null
+  public_profile: PublicProfile | null
 }

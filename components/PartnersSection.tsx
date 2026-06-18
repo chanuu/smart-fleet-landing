@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import type { TenantListing } from '@/types'
 import { ShieldCheckIcon, StarIcon } from './Icons'
+import { supabase } from '@/lib/supabase'
 
 interface PartnersSectionProps {
   tenants: TenantListing[]
@@ -123,25 +124,41 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
               >
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      background: `${accent}22`,
-                      border: `1.5px solid ${accent}55`,
-                      borderRadius: 14,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 18,
-                      fontWeight: 800,
-                      color: accent,
-                      flexShrink: 0,
-                      letterSpacing: '-0.02em',
-                    }}
-                  >
-                    {initials}
-                  </div>
+                  {tenant.logo_url ? (
+                    <img
+                      src={supabase.storage.from('tenant-assets').getPublicUrl(tenant.logo_url).data.publicUrl}
+                      alt={tenant.name}
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 14,
+                        objectFit: 'cover',
+                        border: '1.5px solid rgba(255,255,255,0.10)',
+                        flexShrink: 0,
+                        background: '#1a1a1a',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 52,
+                        height: 52,
+                        background: `${accent}22`,
+                        border: `1.5px solid ${accent}55`,
+                        borderRadius: 14,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                        fontWeight: 800,
+                        color: accent,
+                        flexShrink: 0,
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      {initials}
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <span

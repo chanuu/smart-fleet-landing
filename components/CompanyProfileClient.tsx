@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import type { TenantDetail, VehicleListing } from '@/types'
+import type { TenantDetail, VehicleListing, PublicProfile } from '@/types'
 import VehicleCard from './VehicleCard'
 
 interface Props {
@@ -40,6 +40,7 @@ function StarRow({ filled }: { filled: boolean }) {
 export default function CompanyProfileClient({ tenant, vehicles, years, reviews, rating }: Props) {
   const [tab, setTab] = useState<Tab>('fleet')
   const [activeType, setActiveType] = useState('All')
+  const pp: PublicProfile = tenant.public_profile ?? {}
 
   const vehicleTypes = ['All', ...Array.from(new Set(vehicles.map((v) => v.vehicle_type).filter(Boolean) as string[]))]
   const filtered = activeType === 'All' ? vehicles : vehicles.filter((v) => v.vehicle_type === activeType)
@@ -171,15 +172,23 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
               <h2 style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 20, color: '#fff' }}>
                 About {tenant.name}
               </h2>
-              <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 20 }}>
-                Operating since {new Date().getFullYear() - years}, {tenant.name} has been a trusted name in vehicle rentals
-                {tenant.district_name ? ` across the ${tenant.district_name} region` : ' across Sri Lanka'}.
-                Our fleet spans {vehicles.length} vehicle{vehicles.length !== 1 ? 's' : ''} serving customers islandwide.
-              </p>
-              <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 32 }}>
-                Every vehicle is regularly serviced at certified workshops, fully insured, and equipped with roadside assistance.
-                We&apos;re committed to transparent pricing with no hidden fees.
-              </p>
+              {pp.about ? (
+                <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 32, whiteSpace: 'pre-line' }}>
+                  {pp.about}
+                </div>
+              ) : (
+                <>
+                  <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 20 }}>
+                    Operating since {new Date().getFullYear() - years}, {tenant.name} has been a trusted name in vehicle rentals
+                    {tenant.district_name ? ` across the ${tenant.district_name} region` : ' across Sri Lanka'}.
+                    Our fleet spans {vehicles.length} vehicle{vehicles.length !== 1 ? 's' : ''} serving customers islandwide.
+                  </p>
+                  <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 32 }}>
+                    Every vehicle is regularly serviced at certified workshops, fully insured, and equipped with roadside assistance.
+                    We&apos;re committed to transparent pricing with no hidden fees.
+                  </p>
+                </>
+              )}
 
               <h3 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 16, color: '#fff' }}>
                 Why customers choose us
@@ -257,10 +266,10 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {[
-                    { day: 'Mon – Fri', hours: '7:00 AM – 9:00 PM' },
-                    { day: 'Saturday', hours: '8:00 AM – 8:00 PM' },
-                    { day: 'Sunday', hours: '9:00 AM – 6:00 PM' },
-                    { day: 'Emergency line', hours: '24 / 7', amber: true },
+                    { day: 'Mon – Fri', hours: pp.opening_hours_weekday || '7:00 AM – 9:00 PM' },
+                    { day: 'Saturday', hours: pp.opening_hours_saturday || '8:00 AM – 8:00 PM' },
+                    { day: 'Sunday', hours: pp.opening_hours_sunday || '9:00 AM – 6:00 PM' },
+                    { day: 'Emergency line', hours: pp.emergency_contact || '24 / 7', amber: true },
                   ].map((row) => (
                     <div key={row.day} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, paddingTop: row.amber ? 10 : 0, borderTop: row.amber ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
                       <span style={{ color: 'rgba(255,255,255,0.45)' }}>{row.day}</span>
@@ -276,11 +285,12 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {[
-                    'Minimum driver age: 21 years',
-                    'Valid driving license required',
-                    'Refundable security deposit',
-                    'Free cancellation 24h before',
-                  ].map((p) => (
+                    `Minimum driver age: ${pp.min_driver_age || '21'} years`,
+                    pp.policy_1 || 'Valid driving license required',
+                    pp.policy_2 || 'Refundable security deposit',
+                    pp.policy_3 || `Free cancellation ${pp.cancellation_hours || '24'}h before`,
+                    pp.policy_4,
+                  ].filter(Boolean).map((p) => (
                     <div key={p} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
                       <span style={{ color: '#dc2828', flexShrink: 0 }}>✓</span>
                       {p}
@@ -397,7 +407,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                     </svg>
                   ),
                   label: 'Hours',
-                  value: 'Mon–Fri: 7:00 AM – 9:00 PM\nWeekends: vary · Emergency 24/7',
+                  value: `Mon–Fri: ${pp.opening_hours_weekday || '7:00 AM – 9:00 PM'}\nSat: ${pp.opening_hours_saturday || '8:00 AM – 8:00 PM'}\nSun: ${pp.opening_hours_sunday || '9:00 AM – 6:00 PM'}`,
                 },
               ].filter(Boolean).map((item, idx) => {
                 const it = item as { icon: React.ReactNode; label: string; value: string }
@@ -433,6 +443,29 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
                   </div>
                 )
               })}
+              {pp.whatsapp && (
+                <a
+                  href={`https://wa.me/${pp.whatsapp.replace(/[^0-9+]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginTop: 24,
+                    padding: '14px 28px',
+                    background: '#25D366',
+                    borderRadius: 12,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: '#fff',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Chat on WhatsApp
+                </a>
+              )}
             </div>
 
             {/* Message form */}

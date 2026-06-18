@@ -151,24 +151,41 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
               className="overview-head-responsive"
             >
               {/* Logo */}
-              <div
-                style={{
-                  width: 110,
-                  height: 110,
-                  borderRadius: 22,
-                  background: '#dc2828',
-                  display: 'grid',
-                  placeItems: 'center',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: 42,
-                  letterSpacing: '-0.03em',
-                  boxShadow: '0 12px 36px rgba(220,40,40,0.25)',
-                  flexShrink: 0,
-                }}
-              >
-                {initials}
-              </div>
+              {tenant.logo_url ? (
+                <img
+                  src={supabase.storage.from('tenant-assets').getPublicUrl(tenant.logo_url).data.publicUrl}
+                  alt={tenant.name}
+                  style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: 22,
+                    objectFit: 'cover',
+                    border: '1.5px solid rgba(255,255,255,0.10)',
+                    boxShadow: '0 12px 36px rgba(0,0,0,0.4)',
+                    flexShrink: 0,
+                    background: '#1a1a1a',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 110,
+                    height: 110,
+                    borderRadius: 22,
+                    background: '#dc2828',
+                    display: 'grid',
+                    placeItems: 'center',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: 42,
+                    letterSpacing: '-0.03em',
+                    boxShadow: '0 12px 36px rgba(220,40,40,0.25)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {initials}
+                </div>
+              )}
 
               {/* Info */}
               <div style={{ flex: 1, minWidth: 200 }}>
