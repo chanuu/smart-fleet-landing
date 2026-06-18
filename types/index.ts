@@ -65,6 +65,7 @@ export interface PublicProfile {
   policy_2?: string
   policy_3?: string
   policy_4?: string
+  google_review_url?: string
 }
 
 export interface TenantDetail extends TenantListing {
