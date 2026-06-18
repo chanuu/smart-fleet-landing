@@ -1,10 +1,10 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
 
 interface VehicleImageSliderProps {
-  images: string[]       // resolved public URLs
+  images: string[]
   vehicleName: string
 }
 
@@ -12,12 +12,43 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
   const [active, setActive] = useState(0)
   const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({})
 
+  const validImages = images.filter((_, i) => !imgErrors[i])
+
+  if (validImages.length === 0) {
+    return (
+      <div
+        style={{
+          height: 380,
+          borderRadius: 18,
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg,#1c1c1c,#131313)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+        }}
+      >
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+          <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+          <path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2"/>
+          <path d="M9 17h6"/>
+        </svg>
+        <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.2)' }}>
+          {vehicleName}
+        </span>
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.12)' }}>No photos available</span>
+      </div>
+    )
+  }
+
   const prev = () => setActive((i) => (i - 1 + images.length) % images.length)
   const next = () => setActive((i) => (i + 1) % images.length)
 
-  const src = imgErrors[active]
-    ? 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&auto=format&fit=crop&q=80'
-    : images[active]
+  const currentHasError = imgErrors[active]
+  const src = currentHasError ? images[(active + 1) % images.length] : images[active]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -43,26 +74,16 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
           onError={() => setImgErrors((prev) => ({ ...prev, [active]: true }))}
         />
 
-        {/* Bottom gradient */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,10,0.55) 0%, transparent 50%)' }} />
 
-        {/* Prev / Next — only show when more than 1 image */}
         {images.length > 1 && (
           <>
-            <button
-              onClick={prev}
-              style={arrowStyle('left')}
-              aria-label="Previous image"
-            >
+            <button onClick={prev} style={arrowStyle('left')} aria-label="Previous image">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </button>
-            <button
-              onClick={next}
-              style={arrowStyle('right')}
-              aria-label="Next image"
-            >
+            <button onClick={next} style={arrowStyle('right')} aria-label="Next image">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m9 18 6-6-6-6" />
               </svg>
@@ -70,7 +91,6 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
           </>
         )}
 
-        {/* Counter badge */}
         {images.length > 1 && (
           <div
             style={{
@@ -89,7 +109,7 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
         )}
       </div>
 
-      {/* Thumbnail strip — only when 2+ images */}
+      {/* Thumbnail strip */}
       {images.length > 1 && (
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
           {images.map((url, i) => (
@@ -102,9 +122,7 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
                 height: 52,
                 borderRadius: 10,
                 overflow: 'hidden',
-                border: i === active
-                  ? '2px solid #dc2828'
-                  : '2px solid rgba(255,255,255,0.08)',
+                border: i === active ? '2px solid #dc2828' : '2px solid rgba(255,255,255,0.08)',
                 padding: 0,
                 cursor: 'pointer',
                 position: 'relative',
@@ -113,16 +131,23 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
               }}
               aria-label={`View photo ${i + 1}`}
             >
-              <Image
-                src={imgErrors[i]
-                  ? 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=200&auto=format&fit=crop&q=60'
-                  : url}
-                alt={`${vehicleName} thumbnail ${i + 1}`}
-                fill
-                style={{ objectFit: 'cover', opacity: i === active ? 1 : 0.55 }}
-                sizes="72px"
-                onError={() => setImgErrors((prev) => ({ ...prev, [i]: true }))}
-              />
+              {imgErrors[i] ? (
+                <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="m3 16 5-5 4 4 4-4 5 5" />
+                  </svg>
+                </div>
+              ) : (
+                <Image
+                  src={url}
+                  alt={`${vehicleName} thumbnail ${i + 1}`}
+                  fill
+                  style={{ objectFit: 'cover', opacity: i === active ? 1 : 0.55 }}
+                  sizes="72px"
+                  onError={() => setImgErrors((prev) => ({ ...prev, [i]: true }))}
+                />
+              )}
             </button>
           ))}
         </div>

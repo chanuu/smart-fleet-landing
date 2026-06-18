@@ -89,7 +89,16 @@ async function getTenants(): Promise<TenantListing[]> {
       console.error('Error fetching tenants:', error)
       return []
     }
-    return (data ?? []) as TenantListing[]
+    const tenants = (data ?? []) as TenantListing[]
+    for (const t of tenants) {
+      if (t.logo_url) {
+        const { data: signed } = await supabase.storage
+          .from('tenant-assets')
+          .createSignedUrl(t.logo_url, 86400)
+        t.logo_url = signed?.signedUrl ?? null
+      }
+    }
+    return tenants
   } catch {
     return []
   }

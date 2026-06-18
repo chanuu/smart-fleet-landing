@@ -10,7 +10,6 @@ import { ShieldCheckIcon, StarIcon } from '@/components/Icons'
 
 export const dynamic = 'force-dynamic'
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&auto=format&fit=crop&q=80'
 
 function nameSeed(name: string): number {
   return name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
@@ -42,6 +41,13 @@ async function getTenantData(tenantId: string): Promise<{ tenant: TenantDetail; 
 
     if (tenantRes.error || !tenantRes.data || (tenantRes.data as TenantDetail[]).length === 0) return null
     const tenant = (tenantRes.data as TenantDetail[])[0]
+
+    if (tenant.logo_url) {
+      const { data: signed } = await supabase.storage
+        .from('tenant-assets')
+        .createSignedUrl(tenant.logo_url, 86400)
+      tenant.logo_url = signed?.signedUrl ?? null
+    }
 
     const rawVehicles = (vehiclesRes.data ?? []) as VehicleListing[]
     const vehicles = rawVehicles.map((v) => {
@@ -153,7 +159,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
               {/* Logo */}
               {tenant.logo_url ? (
                 <img
-                  src={supabase.storage.from('tenant-assets').getPublicUrl(tenant.logo_url).data.publicUrl}
+                  src={tenant.logo_url}
                   alt={tenant.name}
                   style={{
                     width: 110,

@@ -9,11 +9,8 @@ import VehicleImageSlider from '@/components/VehicleImageSlider'
 
 export const dynamic = 'force-dynamic'
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&auto=format&fit=crop&q=80'
-
 async function getVehicle(vehicleId: string): Promise<{ vehicle: VehicleListing; imageUrls: string[] } | null> {
   try {
-    // Fetch vehicle info and all its images in parallel
     const [listingRes, imagesRes] = await Promise.all([
       supabase.rpc('get_public_vehicle_listings'),
       supabase.rpc('get_public_vehicle_images', { p_vehicle_id: vehicleId }),
@@ -23,15 +20,10 @@ async function getVehicle(vehicleId: string): Promise<{ vehicle: VehicleListing;
     const vehicle = (listingRes.data as VehicleListing[]).find((v) => v.vehicle_id === vehicleId)
     if (!vehicle) return null
 
-    // Build public URLs for each image
     const imagePaths: string[] = (imagesRes.data ?? []).map((r: { image_path: string }) => r.image_path)
-
-    const imageUrls: string[] = imagePaths.length > 0
-      ? imagePaths.map((path) => {
-          const { data } = supabase.storage.from('vehicle-images').getPublicUrl(path)
-          return data?.publicUrl ?? FALLBACK_IMAGE
-        })
-      : [FALLBACK_IMAGE]
+    const imageUrls: string[] = imagePaths
+      .map((path) => supabase.storage.from('vehicle-images').getPublicUrl(path).data?.publicUrl)
+      .filter((url): url is string => !!url)
 
     return { vehicle, imageUrls }
   } catch {

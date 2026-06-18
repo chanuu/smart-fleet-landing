@@ -1,7 +1,6 @@
 ﻿import Link from 'next/link'
 import type { TenantListing } from '@/types'
 import { ShieldCheckIcon, StarIcon } from './Icons'
-import { supabase } from '@/lib/supabase'
 
 interface PartnersSectionProps {
   tenants: TenantListing[]
@@ -126,7 +125,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   {tenant.logo_url ? (
                     <img
-                      src={supabase.storage.from('tenant-assets').getPublicUrl(tenant.logo_url).data.publicUrl}
+                      src={tenant.logo_url}
                       alt={tenant.name}
                       style={{
                         width: 52,
