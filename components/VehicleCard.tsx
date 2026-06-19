@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import type { VehicleListing } from '@/types'
 import { HeartIcon, UsersIcon, GaugeIcon, FuelIcon, MapPinIcon, ShieldCheckIcon } from './Icons'
 
@@ -49,6 +48,8 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
         textDecoration: 'none',
         color: 'inherit',
         cursor: 'pointer',
+        isolation: 'isolate',
+        WebkitBackfaceVisibility: 'hidden',
       }}
     >
       {/* Image area */}
@@ -62,13 +63,12 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
         }}
       >
         {hasImage ? (
-          <Image
+          <img
             src={vehicle.image_url!}
             alt={displayName}
-            fill
-            style={{ objectFit: 'cover' }}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             onError={() => setImgError(true)}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
           />
         ) : (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -115,8 +115,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
                 fontSize: 11,
                 fontWeight: 600,
                 color: 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(8px)',
-              }}
+                }}
             >
               {vehicle.vehicle_type}
             </span>
@@ -133,7 +132,6 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
               display: 'flex',
               alignItems: 'center',
               gap: 4,
-              backdropFilter: 'blur(8px)',
             }}
           >
             <ShieldCheckIcon size={10} />
@@ -158,7 +156,6 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             justifyContent: 'center',
             cursor: 'pointer',
             color: favorited ? '#dc2828' : 'rgba(255,255,255,0.6)',
-            backdropFilter: 'blur(8px)',
             transition: 'color 0.15s',
           }}
           aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}

@@ -1,6 +1,6 @@
 ﻿import Link from 'next/link'
 import type { TenantListing } from '@/types'
-import { ShieldCheckIcon, StarIcon } from './Icons'
+import { ShieldCheckIcon } from './Icons'
 
 interface PartnersSectionProps {
   tenants: TenantListing[]
@@ -11,9 +11,6 @@ const ACCENT_COLORS = [
   '#a78bfa', '#fb923c', '#2dd4bf', '#e879f9',
 ]
 
-function nameSeed(name: string): number {
-  return name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-}
 
 function getInitials(name: string): string {
   return name
@@ -29,12 +26,6 @@ function getYears(joinedAt: string): number {
   return Math.max(1, now - joined)
 }
 
-function getSeedStats(name: string, vehicleCount: number) {
-  const seed = nameSeed(name)
-  const reviews = 18 + (seed % 180)
-  const rating = (4.2 + ((seed % 8) / 10)).toFixed(1)
-  return { reviews, rating, vehicles: vehicleCount }
-}
 
 export default function PartnersSection({ tenants }: PartnersSectionProps) {
   if (tenants.length === 0) return null
@@ -98,7 +89,6 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
         >
           {tenants.map((tenant, i) => {
             const accent = ACCENT_COLORS[i % ACCENT_COLORS.length]
-            const stats = getSeedStats(tenant.name, tenant.vehicle_count)
             const years = getYears(tenant.joined_at)
             const initials = getInitials(tenant.name)
             const specialty = (tenant.vehicle_types ?? []).slice(0, 3).join(' · ') || 'Fleet'
@@ -214,9 +204,9 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                   }}
                 >
                   {[
-                    { label: 'Vehicles', value: stats.vehicles },
+                    { label: 'Vehicles', value: tenant.vehicle_count },
                     { label: 'Years', value: `${years}+` },
-                    { label: 'Reviews', value: stats.reviews },
+                    { label: 'Types', value: (tenant.vehicle_types ?? []).length },
                   ].map((stat, idx) => (
                     <div
                       key={stat.label}
@@ -237,14 +227,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
                 </div>
 
                 {/* Footer */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <StarIcon size={13} style={{ color: '#dc2828', fill: '#dc2828' }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{stats.rating}</span>
-                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginLeft: 2 }}>
-                      ({stats.reviews} reviews)
-                    </span>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 'auto' }}>
                   <span
                     style={{
                       fontSize: 13,

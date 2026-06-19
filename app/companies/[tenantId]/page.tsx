@@ -6,14 +6,11 @@ import type { TenantDetail, VehicleListing } from '@/types'
 import TopNav from '@/components/TopNav'
 import Footer from '@/components/Footer'
 import CompanyProfileClient from '@/components/CompanyProfileClient'
-import { ShieldCheckIcon, StarIcon } from '@/components/Icons'
+import { ShieldCheckIcon } from '@/components/Icons'
 
 export const dynamic = 'force-dynamic'
 
 
-function nameSeed(name: string): number {
-  return name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-}
 
 function getInitials(name: string): string {
   return name.split(/\s+/).map((w) => w[0]?.toUpperCase() ?? '').slice(0, 2).join('')
@@ -25,12 +22,6 @@ function getYears(joinedAt: string): number {
   return Math.max(1, now - joined)
 }
 
-function getSeedStats(name: string, vehicleCount: number) {
-  const seed = nameSeed(name)
-  const reviews = 18 + (seed % 180)
-  const rating = (4.2 + ((seed % 8) / 10)).toFixed(1)
-  return { reviews, rating, vehicles: vehicleCount }
-}
 
 async function getTenantData(tenantId: string): Promise<{ tenant: TenantDetail; vehicles: VehicleListing[] } | null> {
   try {
@@ -81,7 +72,6 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
   const { tenant, vehicles } = result
   const initials = getInitials(tenant.name)
   const years = getYears(tenant.joined_at)
-  const { reviews, rating } = getSeedStats(tenant.name, tenant.vehicle_count)
   const location = tenant.district_name ?? 'Sri Lanka'
   const since = new Date().getFullYear() - years
 
@@ -215,10 +205,6 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {[
                     {
-                      icon: <StarIcon size={13} style={{ color: '#dc2828' }} />,
-                      content: <><b style={{ color: '#fff', fontWeight: 700 }}>{rating}</b> ({reviews.toLocaleString()})</>,
-                    },
-                    {
                       icon: (
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
                           <path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/>
@@ -302,7 +288,7 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
               {[
                 { num: vehicles.length, label: 'Vehicles Available', amber: true },
                 { num: `${years}+`, label: 'Years Experience' },
-                { num: reviews, label: 'Total Reviews' },
+                { num: (tenant.vehicle_types ?? []).length, label: 'Vehicle Types' },
                 { num: '24/7', label: 'Customer Support', amber: true },
               ].map((s, idx) => (
                 <div
@@ -329,8 +315,6 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
         tenant={tenant}
         vehicles={vehicles}
         years={years}
-        reviews={reviews}
-        rating={rating}
       />
 
       <Footer />

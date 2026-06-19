@@ -8,36 +8,11 @@ interface Props {
   tenant: TenantDetail
   vehicles: VehicleListing[]
   years: number
-  reviews: number
-  rating: string
 }
 
 type Tab = 'fleet' | 'about' | 'reviews' | 'contact'
 
-const STATIC_REVIEWS = [
-  { name: 'Nimal F.', rating: 5, date: '2 weeks ago', text: 'Booked a Land Cruiser for a Yala trip — vehicle was spotless, paperwork was instant, and the staff stayed back when our flight was delayed. Will book again.' },
-  { name: 'Sandhya P.', rating: 5, date: '1 month ago', text: 'Great experience. The car was delivered to my hotel on time and they explained every feature before I drove off. Pricing was transparent — no surprise fees.' },
-  { name: 'Aravinda K.', rating: 4, date: '1 month ago', text: 'Smooth booking, fair pricing. Small AC issue but they swapped the vehicle within an hour. Customer service was excellent.' },
-  { name: 'Priya R.', rating: 5, date: '2 months ago', text: 'Rented for our wedding — the car was immaculate and the driver was a true professional. Made our day perfect.' },
-]
-
-const RATING_DIST = [
-  { stars: 5, pct: 78 },
-  { stars: 4, pct: 16 },
-  { stars: 3, pct: 4 },
-  { stars: 2, pct: 1 },
-  { stars: 1, pct: 1 },
-]
-
-function StarRow({ filled }: { filled: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? '#dc2828' : 'none'} stroke="#dc2828" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-  )
-}
-
-export default function CompanyProfileClient({ tenant, vehicles, years, reviews, rating }: Props) {
+export default function CompanyProfileClient({ tenant, vehicles, years }: Props) {
   const [tab, setTab] = useState<Tab>('fleet')
   const [activeType, setActiveType] = useState('All')
   const pp: PublicProfile = tenant.public_profile ?? {}
@@ -54,7 +29,7 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
   const tabs: { id: Tab; label: string; badge?: number | string }[] = [
     { id: 'fleet', label: 'Fleet', badge: vehicles.length },
     { id: 'about', label: 'About' },
-    { id: 'reviews', label: 'Reviews', badge: reviews },
+    { id: 'reviews', label: 'Reviews' },
     { id: 'contact', label: 'Contact' },
   ]
 
@@ -306,139 +281,86 @@ export default function CompanyProfileClient({ tenant, vehicles, years, reviews,
 
         {/* ── Reviews ── */}
         {tab === 'reviews' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 48, alignItems: 'start' }} className="reviews-layout-responsive">
-            {/* Score summary */}
-            <div style={{ position: 'sticky', top: 140 }}>
-              <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '32px 24px', textAlign: 'center', marginBottom: 14 }}>
-                <div style={{ fontSize: 64, fontWeight: 800, color: '#dc2828', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 8 }}>{rating}</div>
-                <div style={{ display: 'flex', gap: 2, justifyContent: 'center', marginBottom: 8 }}>
-                  {[1, 2, 3, 4, 5].map((s) => <StarRow key={s} filled={s <= Math.round(parseFloat(rating))} />)}
-                </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)' }}>{reviews} verified reviews</div>
-              </div>
-              <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {RATING_DIST.map((r) => (
-                  <div key={r.stars} style={{ display: 'grid', gridTemplateColumns: '32px 1fr 36px', gap: 12, alignItems: 'center', fontSize: 13 }}>
-                    <span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>{r.stars} ★</span>
-                    <div style={{ height: 6, background: 'rgba(255,255,255,0.07)', borderRadius: 999, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${r.pct}%`, background: '#dc2828', borderRadius: 999 }} />
-                    </div>
-                    <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 600, textAlign: 'right' }}>{r.pct}%</span>
-                  </div>
-                ))}
-              </div>
-
-              {pp.google_review_url && (
-                <a
-                  href={pp.google_review_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                    marginTop: 14,
-                    padding: '14px 20px',
-                    background: '#131313',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 14,
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: '#fff',
-                    textDecoration: 'none',
-                    transition: 'border-color 0.15s',
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <div>
+            {pp.google_review_url ? (
+              <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
+                <div style={{ marginBottom: 32 }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style={{ margin: '0 auto 16px' }}>
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  Review us on Google
-                </a>
-              )}
-            </div>
-
-            {/* Review cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {STATIC_REVIEWS.map((r, i) => (
-                <div key={i} style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 24 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-                    <div
-                      style={{
-                        width: 44, height: 44, borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #dc2828, #d97706)',
-                        color: '#fff', display: 'grid', placeItems: 'center',
-                        fontWeight: 800, fontSize: 14, flexShrink: 0,
-                      }}
-                    >
-                      {r.name.split(' ').map((n) => n[0]).join('')}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{r.name}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{r.date}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 1 }}>
-                      {[1, 2, 3, 4, 5].map((s) => <StarRow key={s} filled={s <= r.rating} />)}
-                    </div>
-                  </div>
-                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>{r.text}</p>
+                  <h2 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: '#fff', marginBottom: 10 }}>
+                    Customer Reviews
+                  </h2>
+                  <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
+                    See what our customers say about us on Google, or share your own experience.
+                  </p>
                 </div>
-              ))}
 
-              {pp.google_review_url && (
-                <a
-                  href={pp.google_review_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '24px 28px',
-                    background: 'linear-gradient(135deg, rgba(220,40,40,0.08), rgba(220,40,40,0.03))',
-                    border: '1px solid rgba(220,40,40,0.2)',
-                    borderRadius: 16,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
-                      Had a great experience?
-                    </div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-                      Share your feedback on Google and help other travellers
-                    </div>
-                  </div>
-                  <div
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center' }}>
+                  <a
+                    href={pp.google_review_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '14px 32px',
                       background: '#fff',
-                      borderRadius: 10,
-                      padding: '10px 20px',
-                      fontSize: 14,
+                      borderRadius: 12,
+                      fontSize: 15,
                       fontWeight: 700,
                       color: '#1a1a1a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      flexShrink: 0,
+                      textDecoration: 'none',
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
+                    View Reviews on Google
+                  </a>
+                  <a
+                    href={pp.google_review_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '12px 28px',
+                      background: 'rgba(220,40,40,0.08)',
+                      border: '1px solid rgba(220,40,40,0.25)',
+                      borderRadius: 12,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: '#dc2828',
+                      textDecoration: 'none',
+                    }}
+                  >
                     Write a Review
-                  </div>
-                </a>
-              )}
-            </div>
-
-            <style>{`@media (max-width: 860px) { .reviews-layout-responsive { grid-template-columns: 1fr !important; } }`}</style>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 16px' }}>
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>
+                  No reviews yet
+                </h3>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.2)', maxWidth: 360, margin: '0 auto' }}>
+                  Reviews will appear here once the company connects their Google Business profile.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

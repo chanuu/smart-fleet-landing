@@ -101,8 +101,7 @@ export default function VehicleImageSlider({ images, vehicleName }: VehicleImage
               padding: '4px 10px',
               fontSize: 12, fontWeight: 600,
               color: 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(8px)',
-            }}
+                      }}
           >
             {active + 1} / {images.length}
           </div>
@@ -173,7 +172,6 @@ function arrowStyle(side: 'left' | 'right'): React.CSSProperties {
     justifyContent: 'center',
     color: '#fff',
     cursor: 'pointer',
-    backdropFilter: 'blur(8px)',
     transition: 'background 0.15s',
   }
 }

@@ -89,13 +89,18 @@ body {
   background: var(--amber);
 }
 
-/* Card hover lift */
+/* Card hover lift — desktop only to avoid mobile rendering glitches */
 .card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease;
 }
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+@media (hover: hover) {
+  .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* Booking modal backdrop */
