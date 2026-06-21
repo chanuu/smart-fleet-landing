@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { XIcon, FilterIcon } from './Icons'
 import { useCustomerAuth } from '@/contexts/CustomerAuthContext'
+import { supabase } from '@/lib/supabase'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -19,6 +20,7 @@ export default function TopNav() {
   const { user, loading, signOut } = useCustomerAuth()
   const [mobileOpen,  setMobileOpen]  = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -30,6 +32,21 @@ export default function TopNav() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  useEffect(() => {
+    if (!user) { setAvatarUrl(null); return }
+    let cancelled = false
+    supabase.rpc('get_my_customer_public_profile').then(async ({ data }) => {
+      if (cancelled) return
+      const profile = (data as { profile_image_url: string | null }[] | null)?.[0]
+      if (!profile?.profile_image_url) return
+      const { data: signed } = await supabase.storage
+        .from('license-images')
+        .createSignedUrl(profile.profile_image_url, 3600)
+      if (!cancelled && signed?.signedUrl) setAvatarUrl(signed.signedUrl)
+    })
+    return () => { cancelled = true }
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()
@@ -177,8 +194,8 @@ export default function TopNav() {
                     width: 36,
                     height: 36,
                     borderRadius: '50%',
-                    background: '#dc2828',
-                    border: 'none',
+                    background: avatarUrl ? '#1a1a1a' : '#dc2828',
+                    border: avatarUrl ? '2px solid rgba(255,255,255,0.12)' : 'none',
                     color: '#fff',
                     fontSize: 14,
                     fontWeight: 700,
@@ -186,10 +203,16 @@ export default function TopNav() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    padding: 0,
+                    overflow: 'hidden',
                   }}
                   title={user.email ?? ''}
                 >
-                  {(user.email ?? 'U')[0].toUpperCase()}
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    (user.email ?? 'U')[0].toUpperCase()
+                  )}
                 </button>
 
                 {userMenuOpen && (

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useCustomerAuth } from '@/contexts/CustomerAuthContext'
+import type { CustomerPublicProfile } from '@/types'
 import TopNav from '@/components/TopNav'
 import Footer from '@/components/Footer'
 
@@ -130,6 +131,157 @@ const profileInputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 }
 
+// ---- Trust score card ----
+
+const RATING_CATEGORIES: { key: keyof CustomerPublicProfile; label: string }[] = [
+  { key: 'avg_vehicle_care',        label: 'Vehicle Care' },
+  { key: 'avg_payment_reliability', label: 'Payment Reliability' },
+  { key: 'avg_communication',       label: 'Communication' },
+  { key: 'avg_rule_compliance',     label: 'Rule Compliance' },
+  { key: 'avg_punctuality',         label: 'Punctuality' },
+]
+
+const BLACKLIST_STYLES: Record<string, { bg: string; border: string; color: string; label: string }> = {
+  warning:     { bg: 'rgba(234,179,8,0.10)',  border: 'rgba(234,179,8,0.3)',  color: '#facc15', label: 'Warning' },
+  restricted:  { bg: 'rgba(251,146,60,0.10)', border: 'rgba(251,146,60,0.3)', color: '#fb923c', label: 'Restricted' },
+  blacklisted: { bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.3)',  color: '#f87171', label: 'Blacklisted' },
+}
+
+function TrustScoreCard({ profile, hasLicense }: { profile: CustomerPublicProfile | null; hasLicense: boolean }) {
+  if (!hasLicense) {
+    return (
+      <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 24px', marginBottom: 36 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+          My Trust Score
+        </h2>
+        <div style={{ textAlign: 'center', padding: '24px 16px', border: '1px dashed rgba(255,255,255,0.10)', borderRadius: 10 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>Add your driving license number above</p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>Your trust score will appear once your license is linked to rental history.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 24px', marginBottom: 36 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+          My Trust Score
+        </h2>
+        <div style={{ textAlign: 'center', padding: '24px 16px', border: '1px dashed rgba(255,255,255,0.10)', borderRadius: 10 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.38)', marginBottom: 4 }}>No rental history yet</p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>Your trust score will appear after your first rental is completed and rated.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const rating = profile.global_rating != null ? Number(profile.global_rating) : null
+  const bs = profile.blacklist_status ? BLACKLIST_STYLES[profile.blacklist_status] : null
+
+  return (
+    <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 24px', marginBottom: 36 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 20 }}>
+        My Trust Score
+      </h2>
+
+      {/* Profile header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        {profile.profile_image_url ? (
+          <img
+            src={profile.profile_image_url}
+            alt={profile.display_name ?? 'Profile'}
+            style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.10)', flexShrink: 0, background: '#1a1a1a' }}
+          />
+        ) : (
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(220,40,40,0.15)', border: '2px solid rgba(220,40,40,0.3)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2828" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/>
+            </svg>
+          </div>
+        )}
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+            {profile.display_name ?? 'Driver'}
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
+            License: {profile.license_number}
+          </div>
+        </div>
+      </div>
+
+      {/* Blacklist alert */}
+      {bs && (
+        <div style={{ padding: '10px 14px', background: bs.bg, border: `1px solid ${bs.border}`, borderRadius: 10, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={bs.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span style={{ fontSize: 13, fontWeight: 600, color: bs.color }}>
+            Account Status: {bs.label}
+          </span>
+        </div>
+      )}
+
+      {/* Top stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+        {/* Overall rating */}
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '16px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: rating != null ? '#dc2828' : 'rgba(255,255,255,0.15)', letterSpacing: '-0.03em', lineHeight: 1 }}>
+            {rating != null ? rating.toFixed(1) : '—'}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 2, margin: '6px 0 4px' }}>
+            {[1, 2, 3, 4, 5].map(star => (
+              <svg key={star} width="14" height="14" viewBox="0 0 24 24" fill={rating != null && star <= Math.round(rating) ? '#dc2828' : 'none'} stroke={rating != null && star <= Math.round(rating) ? '#dc2828' : 'rgba(255,255,255,0.15)'} strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>Overall Rating</div>
+        </div>
+
+        {/* Total rentals */}
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '16px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
+            {profile.total_rentals}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em', marginTop: 10 }}>Completed Rentals</div>
+        </div>
+
+        {/* Violations */}
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '16px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: profile.total_violations > 0 ? '#f87171' : '#4ade80', letterSpacing: '-0.03em', lineHeight: 1 }}>
+            {profile.total_violations}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em', marginTop: 10 }}>Disputes</div>
+        </div>
+      </div>
+
+      {/* Rating breakdown */}
+      {rating != null && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Rating Breakdown</div>
+          {RATING_CATEGORIES.map(({ key, label }) => {
+            const val = profile[key] as number | null
+            const pct = val != null ? (Number(val) / 5) * 100 : 0
+            return (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', fontWeight: 500, width: 140, flexShrink: 0 }}>{label}</span>
+                <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: pct >= 70 ? '#4ade80' : pct >= 40 ? '#facc15' : '#f87171', borderRadius: 3, transition: 'width 0.5s ease' }} />
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', width: 28, textAlign: 'right', flexShrink: 0 }}>
+                  {val != null ? Number(val).toFixed(1) : '—'}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ---- Types ----
 
 interface BookingRequest {
@@ -237,6 +389,7 @@ export default function MyBookingsPage() {
 
   const [inquiries, setInquiries]   = useState<BookingRequest[]>([])
   const [rentals,   setRentals]     = useState<RentalRecord[]>([])
+  const [trustProfile, setTrustProfile] = useState<CustomerPublicProfile | null>(null)
   const [fetching,  setFetching]    = useState(true)
   const [fetchErr,  setFetchErr]    = useState<string | null>(null)
 
@@ -249,9 +402,10 @@ export default function MyBookingsPage() {
     setFetching(true)
     setFetchErr(null)
     try {
-      const [reqResult, rentResult] = await Promise.all([
+      const [reqResult, rentResult, profileResult] = await Promise.all([
         supabase.rpc('get_my_booking_requests'),
         supabase.rpc('get_my_rentals'),
+        supabase.rpc('get_my_customer_public_profile'),
       ])
 
       if (reqResult.error) throw new Error(`Inquiries: ${reqResult.error.message}`)
@@ -259,6 +413,20 @@ export default function MyBookingsPage() {
 
       setInquiries((reqResult.data ?? []) as BookingRequest[])
       setRentals((rentResult.data ?? []) as RentalRecord[])
+
+      const profiles = (profileResult.data ?? []) as CustomerPublicProfile[]
+      if (profiles.length > 0) {
+        const p = profiles[0]
+        if (p.profile_image_url) {
+          const { data: signed } = await supabase.storage
+            .from('license-images')
+            .createSignedUrl(p.profile_image_url, 3600)
+          p.profile_image_url = signed?.signedUrl ?? null
+        }
+        setTrustProfile(p)
+      } else {
+        setTrustProfile(null)
+      }
     } catch (err) {
       setFetchErr(err instanceof Error ? err.message : 'Failed to load bookings.')
     } finally {
@@ -289,6 +457,14 @@ export default function MyBookingsPage() {
 
         {/* Profile */}
         <ProfileCard user={user} />
+
+        {/* Trust Score */}
+        {!fetching && (
+          <TrustScoreCard
+            profile={trustProfile}
+            hasLicense={!!user.user_metadata?.license_number}
+          />
+        )}
 
         {fetching ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'rgba(255,255,255,0.28)', paddingTop: 80, fontSize: 14 }}>

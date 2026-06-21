@@ -73,3 +73,18 @@ export interface TenantDetail extends TenantListing {
   address: string | null
   public_profile: PublicProfile | null
 }
+
+export interface CustomerPublicProfile {
+  display_name: string | null
+  license_number: string | null
+  profile_image_url: string | null
+  global_rating: number | null
+  total_rentals: number
+  total_violations: number
+  avg_vehicle_care: number | null
+  avg_payment_reliability: number | null
+  avg_communication: number | null
+  avg_rule_compliance: number | null
+  avg_punctuality: number | null
+  blacklist_status: 'warning' | 'restricted' | 'blacklisted' | null
+}
