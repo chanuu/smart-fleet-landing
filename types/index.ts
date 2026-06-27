@@ -1,5 +1,6 @@
 export interface VehicleListing {
   vehicle_id: string
+  tenant_id: string
   registration_number: string
   brand: string
   model_name: string | null
@@ -14,6 +15,7 @@ export interface VehicleListing {
   base_rate: number | null
   base_kilometers: number | null
   extra_rate_per_km: number | null
+  security_deposit: number | null
   image_path: string | null
   // resolved at fetch time
   image_url?: string | null
@@ -66,6 +68,12 @@ export interface PublicProfile {
   policy_3?: string
   policy_4?: string
   google_review_url?: string
+  delivery_enabled?: string
+  delivery_base_km?: string
+  delivery_base_fee?: string
+  delivery_per_km_fee?: string
+  delivery_max_km?: string
+  delivery_note?: string
 }
 
 export interface TenantDetail extends TenantListing {

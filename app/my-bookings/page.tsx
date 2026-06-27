@@ -14,12 +14,15 @@ function ProfileCard({ user }: { user: NonNullable<ReturnType<typeof useCustomer
   const [fullName, setFullName] = useState<string>(user.user_metadata?.full_name ?? '')
   const [phone,    setPhone]    = useState<string>(user.user_metadata?.phone ?? '')
   const [license,  setLicense]  = useState<string>(user.user_metadata?.license_number ?? '')
+  const [nic,      setNic]      = useState<string>(user.user_metadata?.nic_number ?? '')
   const [saving,   setSaving]   = useState(false)
   const [msg,      setMsg]      = useState<{ ok: boolean; text: string } | null>(null)
 
   const handleSave = async () => {
     const normalizedLicense = license.replace(/\s/g, '').toUpperCase()
+    const normalizedNic = nic.replace(/\s/g, '').toUpperCase()
     setLicense(normalizedLicense)
+    setNic(normalizedNic)
     setSaving(true)
     setMsg(null)
     const { error } = await supabase.auth.updateUser({
@@ -27,6 +30,7 @@ function ProfileCard({ user }: { user: NonNullable<ReturnType<typeof useCustomer
         full_name:      fullName.trim(),
         phone:          phone.trim(),
         license_number: normalizedLicense,
+        nic_number:     normalizedNic,
       },
     })
     setSaving(false)
@@ -77,6 +81,18 @@ function ProfileCard({ user }: { user: NonNullable<ReturnType<typeof useCustomer
             value={license}
             onChange={e => setLicense(e.target.value.replace(/\s/g, '').toUpperCase())}
             placeholder="e.g. B1234567"
+            style={profileInputStyle}
+          />
+        </div>
+
+        {/* NIC number */}
+        <div>
+          <label style={profileLabelStyle}>NIC Number</label>
+          <input
+            type="text"
+            value={nic}
+            onChange={e => setNic(e.target.value.replace(/\s/g, '').toUpperCase())}
+            placeholder="e.g. 200012345678"
             style={profileInputStyle}
           />
         </div>

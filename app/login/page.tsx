@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
+  const [nic, setNic]           = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState<string | null>(null)
@@ -45,7 +46,7 @@ export default function LoginPage() {
       if (error) { setError(error); setSubmitting(false); return }
       router.push('/my-bookings')
     } else {
-      const { error } = await signUp(email, password)
+      const { error } = await signUp(email, password, { nic_number: nic.trim().toUpperCase() || undefined })
       if (error) { setError(error); setSubmitting(false); return }
       setSuccess('Account created! Check your email to confirm, then sign in.')
       setTab('signin')
@@ -133,17 +134,29 @@ export default function LoginPage() {
                 />
               </div>
               {tab === 'signup' && (
-                <div>
-                  <label style={labelStyle}>Confirm Password</label>
-                  <input
-                    type="password"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    placeholder="Repeat your password"
-                    required
-                    style={inputStyle}
-                  />
-                </div>
+                <>
+                  <div>
+                    <label style={labelStyle}>Confirm Password</label>
+                    <input
+                      type="password"
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      placeholder="Repeat your password"
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>NIC Number</label>
+                    <input
+                      type="text"
+                      value={nic}
+                      onChange={(e) => setNic(e.target.value.replace(/\s/g, '').toUpperCase())}
+                      placeholder="e.g. 200012345678 or 912345678V"
+                      style={inputStyle}
+                    />
+                  </div>
+                </>
               )}
             </div>
 

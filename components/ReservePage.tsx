@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
-import type { VehicleListing } from '@/types'
+import type { VehicleListing, PublicProfile } from '@/types'
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -16,8 +16,6 @@ import {
   UsersIcon,
   FuelIcon,
   GaugeIcon,
-  CreditCardIcon,
-  BanknoteIcon,
   CheckIcon,
 } from './Icons'
 import { useCustomerAuth } from '@/contexts/CustomerAuthContext'
@@ -26,7 +24,7 @@ interface ReservePageProps {
   vehicle: VehicleListing
 }
 
-const STEPS = ['Trip Details', 'Add-ons', 'Driver Info', 'Review & Pay']
+const STEPS = ['Trip Details', 'Add-ons', 'Driver Info', 'Review & Submit']
 
 interface FormData {
   // Step 1
@@ -45,9 +43,9 @@ interface FormData {
   customer_phone: string
   customer_email: string
   customer_license: string
+  customer_nic: string
   customer_address: string
   // Step 4
-  payment_method: 'cash' | 'card'
   notes: string
 }
 
@@ -65,8 +63,8 @@ const initialForm: FormData = {
   customer_phone: '',
   customer_email: '',
   customer_license: '',
+  customer_nic: '',
   customer_address: '',
-  payment_method: 'cash',
   notes: '',
 }
 
@@ -78,6 +76,18 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   const { user } = useCustomerAuth()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<FormData>(initialForm)
+  const [deliveryConfig, setDeliveryConfig] = useState<PublicProfile | null>(null)
+
+  // Fetch tenant delivery config
+  useEffect(() => {
+    if (!vehicle.tenant_id) return
+    supabase.rpc('get_public_tenant', { p_tenant_id: vehicle.tenant_id }).then(({ data }) => {
+      const tenants = (data ?? []) as { public_profile: PublicProfile | null }[]
+      if (tenants.length > 0 && tenants[0].public_profile) {
+        setDeliveryConfig(tenants[0].public_profile)
+      }
+    })
+  }, [vehicle.tenant_id])
 
   // Pre-fill driver info from saved profile
   useEffect(() => {
@@ -86,6 +96,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
       ...prev,
       customer_email:   prev.customer_email   || (user.email ?? ''),
       customer_license: prev.customer_license || (user.user_metadata?.license_number ?? ''),
+      customer_nic:     prev.customer_nic     || (user.user_metadata?.nic_number ?? ''),
     }))
   }, [user])
   const [submitting, setSubmitting] = useState(false)
@@ -109,12 +120,14 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   const driverTotal = form.with_driver ? ADDON_DRIVER_PRICE * rentalDays : 0
   const childSeatTotal = form.child_seat ? ADDON_CHILD_SEAT_PRICE * rentalDays : 0
   const gpsTotal = form.gps_nav ? ADDON_GPS_PRICE * rentalDays : 0
-  const deliveryFee = form.pickup_type === 'delivery' ? 1500 : 0
+  const deliveryEnabled = deliveryConfig?.delivery_enabled === 'yes'
+  const deliveryBaseFee = Number(deliveryConfig?.delivery_base_fee || 1500)
+  const deliveryFee = form.pickup_type === 'delivery' ? deliveryBaseFee : 0
   const grandTotal = baseTotal + driverTotal + childSeatTotal + gpsTotal + deliveryFee
 
   const set = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     let value: string | boolean = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value
-    if (field === 'customer_license' && typeof value === 'string') {
+    if ((field === 'customer_license' || field === 'customer_nic') && typeof value === 'string') {
       value = value.replace(/\s/g, '').toUpperCase()
     }
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -168,11 +181,11 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
         p_pickup_type: form.pickup_type,
         p_delivery_address: form.delivery_address.trim(),
         p_notes: [
+          form.customer_nic.trim() ? `NIC: ${form.customer_nic.trim()}` : '',
           form.customer_address.trim() ? `Address: ${form.customer_address.trim()}` : '',
           form.notes.trim(),
           form.child_seat ? 'Child seat requested' : '',
           form.gps_nav ? 'GPS navigation requested' : '',
-          form.payment_method === 'card' ? 'Preferred payment: Card' : 'Preferred payment: Cash',
         ].filter(Boolean).join(' | '),
       })
       if (rpcError) throw rpcError
@@ -279,7 +292,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
               padding: '32px',
             }}
           >
-            {step === 0 && <Step1 form={form} set={set} setForm={setForm} />}
+            {step === 0 && <Step1 form={form} set={set} setForm={setForm} deliveryConfig={deliveryConfig} deliveryBaseFee={deliveryBaseFee} vehicle={vehicle} />}
             {step === 1 && <Step2 form={form} toggleBool={toggleBool} rentalDays={rentalDays} />}
             {step === 2 && <Step3 form={form} set={set} />}
             {step === 3 && <Step4 form={form} setForm={setForm} vehicle={vehicle} rentalDays={rentalDays} grandTotal={grandTotal} />}
@@ -327,7 +340,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
                     padding: '12px 28px',
                     borderRadius: 10,
                     border: 'none',
-                    background: '#dc2828',
+                    background: '#D2042D',
                     color: '#fff',
                     fontSize: 14,
                     fontWeight: 700,
@@ -344,7 +357,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
                     padding: '12px 28px',
                     borderRadius: 10,
                     border: 'none',
-                    background: submitting ? 'rgba(220,40,40,0.5)' : '#dc2828',
+                    background: submitting ? 'rgba(210,4,45,0.5)' : '#D2042D',
                     color: '#fff',
                     fontSize: 14,
                     fontWeight: 700,
@@ -393,10 +406,16 @@ function Step1({
   form,
   set,
   setForm,
+  deliveryConfig,
+  deliveryBaseFee,
+  vehicle,
 }: {
   form: FormData
   set: (f: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
   setForm: React.Dispatch<React.SetStateAction<FormData>>
+  deliveryConfig: PublicProfile | null
+  deliveryBaseFee: number
+  vehicle: VehicleListing
 }) {
   return (
     <div>
@@ -441,9 +460,9 @@ function Step1({
                 flex: 1,
                 padding: '11px',
                 borderRadius: 8,
-                border: `1px solid ${form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
-                background: form.pickup_type === type ? 'rgba(220,40,40,0.08)' : 'rgba(255,255,255,0.03)',
-                color: form.pickup_type === type ? '#dc2828' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${form.pickup_type === type ? '#D2042D' : 'rgba(255,255,255,0.10)'}`,
+                background: form.pickup_type === type ? 'rgba(210,4,45,0.08)' : 'rgba(255,255,255,0.03)',
+                color: form.pickup_type === type ? '#D2042D' : 'rgba(255,255,255,0.5)',
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -457,7 +476,7 @@ function Step1({
       </Field>
 
       {form.pickup_type === 'delivery' && (
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Field label="Delivery Address *" icon={<MapPinIcon size={13} />}>
             <input
               type="text"
@@ -467,6 +486,44 @@ function Step1({
               style={inputStyle}
             />
           </Field>
+          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#D2042D', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Delivery Fee
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+              {deliveryConfig?.delivery_enabled === 'yes' ? (
+                <>
+                  <div>First {deliveryConfig.delivery_base_km || '5'} km — <span style={{ color: '#fff', fontWeight: 600 }}>LKR {deliveryBaseFee.toLocaleString()}</span></div>
+                  {Number(deliveryConfig.delivery_per_km_fee) > 0 && (
+                    <div>After that — LKR {Number(deliveryConfig.delivery_per_km_fee).toLocaleString()} per km</div>
+                  )}
+                  {Number(deliveryConfig.delivery_max_km) > 0 && (
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Max delivery: {deliveryConfig.delivery_max_km} km</div>
+                  )}
+                  {deliveryConfig.delivery_note && (
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{deliveryConfig.delivery_note}</div>
+                  )}
+                </>
+              ) : (
+                <div>Delivery fee: <span style={{ color: '#fff', fontWeight: 600 }}>LKR {deliveryBaseFee.toLocaleString()}</span></div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refundable deposit */}
+      {vehicle.security_deposit != null && vehicle.security_deposit > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#D2042D', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Refundable Deposit
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+              <div>Security deposit: <span style={{ color: '#fff', fontWeight: 600 }}>LKR {Number(vehicle.security_deposit).toLocaleString()}</span></div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>Collected at pickup and fully refunded when the vehicle is returned in good condition.</div>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -523,8 +580,8 @@ function Step2({
                 gap: 16,
                 padding: '16px',
                 borderRadius: 12,
-                border: `1px solid ${active ? '#dc2828' : 'rgba(255,255,255,0.08)'}`,
-                background: active ? 'rgba(220,40,40,0.06)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${active ? '#D2042D' : 'rgba(255,255,255,0.08)'}`,
+                background: active ? 'rgba(210,4,45,0.06)' : 'rgba(255,255,255,0.02)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s',
@@ -533,13 +590,13 @@ function Step2({
             >
               <span style={{ fontSize: 28, flexShrink: 0 }}>{addon.icon}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#dc2828' : '#fff', marginBottom: 3 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#D2042D' : '#fff', marginBottom: 3 }}>
                   {addon.label}
                 </div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)' }}>{addon.desc}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#dc2828' : 'rgba(255,255,255,0.5)' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#D2042D' : 'rgba(255,255,255,0.5)' }}>
                   +LKR {addon.price.toLocaleString()}/day
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>
@@ -551,8 +608,8 @@ function Step2({
                   width: 20,
                   height: 20,
                   borderRadius: 5,
-                  border: `2px solid ${active ? '#dc2828' : 'rgba(255,255,255,0.16)'}`,
-                  background: active ? '#dc2828' : 'transparent',
+                  border: `2px solid ${active ? '#D2042D' : 'rgba(255,255,255,0.16)'}`,
+                  background: active ? '#D2042D' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -612,17 +669,24 @@ function Step3({
             style={inputStyle}
           />
         </Field>
-        <div style={{ gridColumn: '1 / -1' }}>
-          <Field label="Driving License Number" icon={<IdCardIcon size={13} />}>
-            <input
-              type="text"
-              value={form.customer_license}
-              onChange={set('customer_license')}
-              placeholder="e.g. B1234567"
-              style={inputStyle}
-            />
-          </Field>
-        </div>
+        <Field label="Driving License Number" icon={<IdCardIcon size={13} />}>
+          <input
+            type="text"
+            value={form.customer_license}
+            onChange={set('customer_license')}
+            placeholder="e.g. B1234567"
+            style={inputStyle}
+          />
+        </Field>
+        <Field label="NIC Number" icon={<IdCardIcon size={13} />}>
+          <input
+            type="text"
+            value={form.customer_nic}
+            onChange={set('customer_nic')}
+            placeholder="e.g. 200012345678"
+            style={inputStyle}
+          />
+        </Field>
         <div style={{ gridColumn: '1 / -1' }}>
           <Field label="Home Address" icon={<MapPinIcon size={13} />}>
             <input
@@ -654,7 +718,7 @@ function Step4({
 }) {
   return (
     <div>
-      <StepHeader title="Review & Pay" subtitle="Review your booking details and choose a payment method." />
+      <StepHeader title="Review & Submit" subtitle="Review your booking details before submitting." />
 
       {/* Summary rows */}
       <div
@@ -675,6 +739,7 @@ function Step4({
           { label: 'Driver', value: form.with_driver ? 'Professional driver included' : 'Self-drive' },
           { label: 'Name', value: form.customer_name },
           { label: 'Phone', value: form.customer_phone },
+          { label: 'NIC', value: form.customer_nic },
           { label: 'Address', value: form.customer_address },
         ].map((row) => (
           <div
@@ -693,42 +758,6 @@ function Step4({
         ))}
       </div>
 
-      {/* Payment method */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={labelStyle}>Payment Method</label>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[
-            { value: 'cash', label: 'Cash on Pickup', icon: <BanknoteIcon size={18} /> },
-            { value: 'card', label: 'Credit / Debit Card', icon: <CreditCardIcon size={18} /> },
-          ].map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setForm((prev) => ({ ...prev, payment_method: opt.value as 'cash' | 'card' }))}
-              style={{
-                flex: 1,
-                padding: '14px 12px',
-                borderRadius: 10,
-                border: `1px solid ${form.payment_method === opt.value ? '#dc2828' : 'rgba(255,255,255,0.10)'}`,
-                background: form.payment_method === opt.value ? 'rgba(220,40,40,0.08)' : 'rgba(255,255,255,0.02)',
-                color: form.payment_method === opt.value ? '#dc2828' : 'rgba(255,255,255,0.5)',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              {opt.icon}
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Notes */}
       <div>
         <label style={labelStyle}>Additional Notes</label>
@@ -745,15 +774,15 @@ function Step4({
         style={{
           marginTop: 20,
           padding: '14px 16px',
-          background: 'rgba(220,40,40,0.06)',
-          border: '1px solid rgba(220,40,40,0.2)',
+          background: 'rgba(210,4,45,0.06)',
+          border: '1px solid rgba(210,4,45,0.2)',
           borderRadius: 10,
           fontSize: 13,
           color: 'rgba(255,255,255,0.62)',
           lineHeight: 1.6,
         }}
       >
-        <strong style={{ color: '#dc2828' }}>Estimated Total: LKR {grandTotal.toLocaleString()}</strong>
+        <strong style={{ color: '#D2042D' }}>Estimated Total: LKR {grandTotal.toLocaleString()}</strong>
         <br />
         Submitting this form sends a booking request. The rental partner will confirm within 24 hours.
       </div>
@@ -798,14 +827,14 @@ function SuccessScreen({
           style={{
             width: 80,
             height: 80,
-            background: 'rgba(220,40,40,0.12)',
-            border: '2px solid rgba(220,40,40,0.4)',
+            background: 'rgba(210,4,45,0.12)',
+            border: '2px solid rgba(210,4,45,0.4)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 24px',
-            color: '#dc2828',
+            color: '#D2042D',
           }}
         >
           <CheckCircleIcon size={40} />
@@ -814,45 +843,31 @@ function SuccessScreen({
           Booking Requested!
         </h2>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 28 }}>
-          Your request for <strong style={{ color: '#fff' }}>{displayName}</strong> ({rentalDays} day{rentalDays !== 1 ? 's' : ''}) totalling{' '}
-          <strong style={{ color: '#dc2828' }}>LKR {total.toLocaleString()}</strong> has been submitted.
-          The rental partner will contact you within 24 hours.
+          Your request for <strong style={{ color: '#fff' }}>{displayName}</strong> ({rentalDays} day{rentalDays !== 1 ? 's' : ''})
+          {total > 0 && <> totalling <strong style={{ color: '#D2042D' }}>LKR {total.toLocaleString()}</strong></>}
+          {' '}has been submitted. The rental partner will contact you within 24 hours.
         </p>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <Link
-            href="/"
-            style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: 10,
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.7)',
-              textDecoration: 'none',
-              fontSize: 14,
-              fontWeight: 600,
-              textAlign: 'center',
-            }}
-          >
-            Back to Home
-          </Link>
-          <Link
-            href="/browse"
-            style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: 10,
-              background: '#dc2828',
-              color: '#fff',
-              textDecoration: 'none',
-              fontSize: 14,
-              fontWeight: 700,
-              textAlign: 'center',
-            }}
-          >
-            Browse More
-          </Link>
-        </div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 20 }}>
+          To view more details about your booking, track its status, and manage your reservations — create a free account.
+        </p>
+        <Link
+          href="/login"
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '13px',
+            borderRadius: 10,
+            background: '#D2042D',
+            color: '#fff',
+            textDecoration: 'none',
+            fontSize: 15,
+            fontWeight: 700,
+            textAlign: 'center',
+          }}
+        >
+          Sign Up to Track Your Booking
+        </Link>
       </div>
     </div>
   )
@@ -957,11 +972,39 @@ function VehicleSummaryCard({
               borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none',
             }}
           >
-            <span style={{ color: '#dc2828' }}>{spec.icon}</span>
+            <span style={{ color: '#D2042D' }}>{spec.icon}</span>
             <span style={{ textTransform: 'capitalize' }}>{spec.label}</span>
           </div>
         ))}
       </div>
+
+      {/* Rate card info */}
+      {(vehicle.base_rate != null || vehicle.base_kilometers != null) && (
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#D2042D', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            {vehicle.rate_plan_name || 'Rate Card'}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {vehicle.base_rate != null && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  {vehicle.base_kilometers != null && vehicle.base_kilometers > 0
+                    ? `First ${vehicle.base_kilometers.toLocaleString()} km`
+                    : `Per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}`}
+                </span>
+                <span style={{ color: '#fff', fontWeight: 600 }}>LKR {vehicle.base_rate.toLocaleString()}</span>
+              </div>
+            )}
+            {vehicle.extra_rate_per_km != null && vehicle.extra_rate_per_km > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Extra per km</span>
+                <span style={{ color: '#fff', fontWeight: 600 }}>LKR {vehicle.extra_rate_per_km.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Price breakdown */}
       <div style={{ padding: '16px' }}>
@@ -989,7 +1032,7 @@ function VehicleSummaryCard({
           }}
         >
           <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Estimated Total</span>
-          <span style={{ fontSize: 19, fontWeight: 800, color: '#dc2828' }}>
+          <span style={{ fontSize: 19, fontWeight: 800, color: '#D2042D' }}>
             LKR {grandTotal.toLocaleString()}
           </span>
         </div>
@@ -1023,7 +1066,7 @@ function Field({ label, icon, children }: { label: string; icon?: React.ReactNod
   return (
     <div>
       <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 5 }}>
-        {icon && <span style={{ color: '#dc2828' }}>{icon}</span>}
+        {icon && <span style={{ color: '#D2042D' }}>{icon}</span>}
         {label}
       </label>
       {children}

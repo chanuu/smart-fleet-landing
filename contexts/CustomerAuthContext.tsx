@@ -9,7 +9,7 @@ interface CustomerAuthContextValue {
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, metadata?: { nic_number?: string }) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -40,8 +40,12 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     return { error: error?.message ?? null }
   }
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password })
+  const signUp = async (email: string, password: string, metadata?: { nic_number?: string }) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: metadata ? { data: { nic_number: metadata.nic_number } } : undefined,
+    })
     return { error: error?.message ?? null }
   }
 
