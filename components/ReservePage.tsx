@@ -26,6 +26,14 @@ interface ReservePageProps {
 
 const STEPS = ['Trip Details', 'Add-ons', 'Driver Info', 'Review & Submit']
 
+interface TenantAddon {
+  name: string
+  price: number
+  icon: string
+  description: string
+  per_day: boolean
+}
+
 interface FormData {
   // Step 1
   start_date: string
@@ -35,9 +43,7 @@ interface FormData {
   pickup_type: 'office' | 'delivery'
   delivery_address: string
   // Step 2
-  with_driver: boolean
-  child_seat: boolean
-  gps_nav: boolean
+  selected_addons: Record<string, boolean>
   // Step 3
   customer_name: string
   customer_phone: string
@@ -56,9 +62,7 @@ const initialForm: FormData = {
   return_time: '18:00',
   pickup_type: 'office',
   delivery_address: '',
-  with_driver: false,
-  child_seat: false,
-  gps_nav: false,
+  selected_addons: {},
   customer_name: '',
   customer_phone: '',
   customer_email: '',
@@ -68,23 +72,37 @@ const initialForm: FormData = {
   notes: '',
 }
 
-const ADDON_DRIVER_PRICE = 2500
-const ADDON_CHILD_SEAT_PRICE = 500
-const ADDON_GPS_PRICE = 300
+const DEFAULT_ADDONS: TenantAddon[] = [
+  { name: 'Professional Driver', price: 5000, icon: '👨‍✈️', description: 'Experienced, licensed driver for the full duration', per_day: true },
+  { name: 'Child Safety Seat', price: 1000, icon: '🪑', description: 'Certified child seat suitable for ages 1–6', per_day: true },
+  { name: 'Spare Wheel', price: 500, icon: '🛞', description: 'Extra spare wheel for long-distance trips', per_day: false },
+  { name: 'Umbrella', price: 100, icon: '☂️', description: 'Complimentary umbrella for rainy days', per_day: false },
+]
 
 export default function ReservePage({ vehicle }: ReservePageProps) {
   const { user } = useCustomerAuth()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<FormData>(initialForm)
   const [deliveryConfig, setDeliveryConfig] = useState<PublicProfile | null>(null)
+  const [tenantAddons, setTenantAddons] = useState<TenantAddon[]>(DEFAULT_ADDONS)
 
-  // Fetch tenant delivery config
+  // Fetch tenant config (delivery settings + addons)
   useEffect(() => {
     if (!vehicle.tenant_id) return
+
+    // Fetch delivery config from public profile
     supabase.rpc('get_public_tenant', { p_tenant_id: vehicle.tenant_id }).then(({ data }) => {
       const tenants = (data ?? []) as { public_profile: PublicProfile | null }[]
       if (tenants.length > 0 && tenants[0].public_profile) {
         setDeliveryConfig(tenants[0].public_profile)
+      }
+    })
+
+    // Fetch addons from dedicated table
+    supabase.rpc('get_public_tenant_addons', { p_tenant_id: vehicle.tenant_id }).then(({ data }) => {
+      const rows = (data ?? []) as { addon_id: string; name: string; price: number; icon: string; description: string; per_day: boolean }[]
+      if (rows.length > 0) {
+        setTenantAddons(rows.map(r => ({ name: r.name, price: Number(r.price), icon: r.icon, description: r.description ?? '', per_day: r.per_day })))
       }
     })
   }, [vehicle.tenant_id])
@@ -117,13 +135,14 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   })()
 
   const baseTotal = (vehicle.base_rate ?? 0) * rentalDays
-  const driverTotal = form.with_driver ? ADDON_DRIVER_PRICE * rentalDays : 0
-  const childSeatTotal = form.child_seat ? ADDON_CHILD_SEAT_PRICE * rentalDays : 0
-  const gpsTotal = form.gps_nav ? ADDON_GPS_PRICE * rentalDays : 0
+  const addonsTotal = tenantAddons.reduce((sum, addon) => {
+    if (!form.selected_addons[addon.name]) return sum
+    return sum + (addon.per_day ? addon.price * rentalDays : addon.price)
+  }, 0)
   const deliveryEnabled = deliveryConfig?.delivery_enabled === 'yes'
   const deliveryBaseFee = Number(deliveryConfig?.delivery_base_fee || 1500)
   const deliveryFee = form.pickup_type === 'delivery' ? deliveryBaseFee : 0
-  const grandTotal = baseTotal + driverTotal + childSeatTotal + gpsTotal + deliveryFee
+  const grandTotal = baseTotal + addonsTotal + deliveryFee
 
   const set = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     let value: string | boolean = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value
@@ -133,9 +152,6 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const toggleBool = (field: keyof FormData) => () => {
-    setForm((prev) => ({ ...prev, [field]: !prev[field] }))
-  }
 
   const validateStep = (): string | null => {
     if (step === 0) {
@@ -177,15 +193,16 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
         p_start_time: form.start_time,
         p_return_date: form.return_date,
         p_return_time: form.return_time,
-        p_with_driver: form.with_driver,
+        p_with_driver: !!form.selected_addons['Professional Driver'],
         p_pickup_type: form.pickup_type,
         p_delivery_address: form.delivery_address.trim(),
         p_notes: [
           form.customer_nic.trim() ? `NIC: ${form.customer_nic.trim()}` : '',
           form.customer_address.trim() ? `Address: ${form.customer_address.trim()}` : '',
           form.notes.trim(),
-          form.child_seat ? 'Child seat requested' : '',
-          form.gps_nav ? 'GPS navigation requested' : '',
+          ...tenantAddons
+            .filter(a => form.selected_addons[a.name])
+            .map(a => `${a.name} requested`),
         ].filter(Boolean).join(' | '),
       })
       if (rpcError) throw rpcError
@@ -293,9 +310,9 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
             }}
           >
             {step === 0 && <Step1 form={form} set={set} setForm={setForm} deliveryConfig={deliveryConfig} deliveryBaseFee={deliveryBaseFee} vehicle={vehicle} />}
-            {step === 1 && <Step2 form={form} toggleBool={toggleBool} rentalDays={rentalDays} />}
+            {step === 1 && <Step2 form={form} setForm={setForm} rentalDays={rentalDays} addons={tenantAddons} />}
             {step === 2 && <Step3 form={form} set={set} />}
-            {step === 3 && <Step4 form={form} setForm={setForm} vehicle={vehicle} rentalDays={rentalDays} grandTotal={grandTotal} />}
+            {step === 3 && <Step4 form={form} setForm={setForm} vehicle={vehicle} rentalDays={rentalDays} grandTotal={grandTotal} addons={tenantAddons} />}
 
             {error && (
               <div
@@ -379,9 +396,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
               form={form}
               rentalDays={rentalDays}
               baseTotal={baseTotal}
-              driverTotal={driverTotal}
-              childSeatTotal={childSeatTotal}
-              gpsTotal={gpsTotal}
+              addons={tenantAddons}
               deliveryFee={deliveryFee}
               grandTotal={grandTotal}
               imgError={imgError}
@@ -532,48 +547,34 @@ function Step1({
 
 function Step2({
   form,
-  toggleBool,
+  setForm,
   rentalDays,
+  addons,
 }: {
   form: FormData
-  toggleBool: (f: keyof FormData) => () => void
+  setForm: React.Dispatch<React.SetStateAction<FormData>>
   rentalDays: number
+  addons: TenantAddon[]
 }) {
-  const addons = [
-    {
-      key: 'with_driver' as keyof FormData,
-      label: 'Professional Driver',
-      desc: 'Experienced, licensed driver for the full duration',
-      price: ADDON_DRIVER_PRICE,
-      icon: '👨‍✈️',
-    },
-    {
-      key: 'child_seat' as keyof FormData,
-      label: 'Child Safety Seat',
-      desc: 'Certified child seat suitable for ages 1–6',
-      price: ADDON_CHILD_SEAT_PRICE,
-      icon: '🪑',
-    },
-    {
-      key: 'gps_nav' as keyof FormData,
-      label: 'GPS Navigation',
-      desc: 'Built-in GPS device with offline Sri Lanka maps',
-      price: ADDON_GPS_PRICE,
-      icon: '🧭',
-    },
-  ]
+  const toggleAddon = (name: string) => {
+    setForm(prev => ({
+      ...prev,
+      selected_addons: { ...prev.selected_addons, [name]: !prev.selected_addons[name] },
+    }))
+  }
 
   return (
     <div>
       <StepHeader title="Add-ons" subtitle="Enhance your rental experience with optional extras." />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {addons.map((addon) => {
-          const active = form[addon.key] as boolean
+          const active = !!form.selected_addons[addon.name]
+          const totalPrice = addon.per_day ? addon.price * rentalDays : addon.price
           return (
             <button
-              key={addon.key}
+              key={addon.name}
               type="button"
-              onClick={toggleBool(addon.key)}
+              onClick={() => toggleAddon(addon.name)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -591,17 +592,19 @@ function Step2({
               <span style={{ fontSize: 28, flexShrink: 0 }}>{addon.icon}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#D2042D' : '#fff', marginBottom: 3 }}>
-                  {addon.label}
+                  {addon.name}
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)' }}>{addon.desc}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)' }}>{addon.description}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: active ? '#D2042D' : 'rgba(255,255,255,0.5)' }}>
-                  +LKR {addon.price.toLocaleString()}/day
+                  +LKR {addon.price.toLocaleString()}{addon.per_day ? '/day' : ''}
                 </div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>
-                  LKR {(addon.price * rentalDays).toLocaleString()} total
-                </div>
+                {addon.per_day && rentalDays > 1 && (
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>
+                    LKR {totalPrice.toLocaleString()} total
+                  </div>
+                )}
               </div>
               <div
                 style={{
@@ -709,13 +712,16 @@ function Step4({
   vehicle,
   rentalDays,
   grandTotal,
+  addons,
 }: {
   form: FormData
   setForm: React.Dispatch<React.SetStateAction<FormData>>
   vehicle: VehicleListing
   rentalDays: number
   grandTotal: number
+  addons: TenantAddon[]
 }) {
+  const tenantAddons = addons
   return (
     <div>
       <StepHeader title="Review & Submit" subtitle="Review your booking details before submitting." />
@@ -736,7 +742,7 @@ function Step4({
           { label: 'Return', value: `${form.return_date} at ${form.return_time}` },
           { label: 'Duration', value: `${rentalDays} day${rentalDays !== 1 ? 's' : ''}` },
           { label: 'Location', value: form.pickup_type === 'office' ? 'Office pickup' : `Delivery: ${form.delivery_address}` },
-          { label: 'Driver', value: form.with_driver ? 'Professional driver included' : 'Self-drive' },
+          { label: 'Add-ons', value: tenantAddons.filter(a => form.selected_addons[a.name]).map(a => a.name).join(', ') || 'None' },
           { label: 'Name', value: form.customer_name },
           { label: 'Phone', value: form.customer_phone },
           { label: 'NIC', value: form.customer_nic },
@@ -881,9 +887,7 @@ function VehicleSummaryCard({
   form,
   rentalDays,
   baseTotal,
-  driverTotal,
-  childSeatTotal,
-  gpsTotal,
+  addons,
   deliveryFee,
   grandTotal,
   imgError,
@@ -895,9 +899,7 @@ function VehicleSummaryCard({
   form: FormData
   rentalDays: number
   baseTotal: number
-  driverTotal: number
-  childSeatTotal: number
-  gpsTotal: number
+  addons: TenantAddon[]
   deliveryFee: number
   grandTotal: number
   imgError: boolean
@@ -1016,9 +1018,13 @@ function VehicleSummaryCard({
             label={`Base rate × ${rentalDays} day${rentalDays !== 1 ? 's' : ''}`}
             amount={baseTotal}
           />
-          {driverTotal > 0 && <PriceLine label="Driver" amount={driverTotal} />}
-          {childSeatTotal > 0 && <PriceLine label="Child Seat" amount={childSeatTotal} />}
-          {gpsTotal > 0 && <PriceLine label="GPS Navigation" amount={gpsTotal} />}
+          {addons.filter(a => form.selected_addons[a.name]).map(a => (
+            <PriceLine
+              key={a.name}
+              label={a.name}
+              amount={a.per_day ? a.price * rentalDays : a.price}
+            />
+          ))}
           {deliveryFee > 0 && <PriceLine label="Delivery Fee" amount={deliveryFee} />}
         </div>
         <div
