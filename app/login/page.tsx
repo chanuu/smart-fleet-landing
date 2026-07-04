@@ -194,7 +194,10 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
             <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>← Back to home</Link>
-            <a href="http://app.rentcartours.com/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>Staff Login →</a>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+              <a href="https://app.rentcartours.com/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>Staff Login →</a>
+              <a href="https://app.rentcartours.com/register" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>List Your Fleet →</a>
+            </div>
           </div>
         </div>
       </div>

@@ -44,7 +44,10 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: metadata ? { data: { nic_number: metadata.nic_number } } : undefined,
+      options: {
+        emailRedirectTo: 'https://rentcartours.com/login',
+        data: metadata ? { nic_number: metadata.nic_number } : undefined,
+      },
     })
     return { error: error?.message ?? null }
   }
