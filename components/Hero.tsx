@@ -3,20 +3,33 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { HERO_IMAGES, PROVINCES, VEHICLE_TYPES, STATS } from '@/lib/data'
+import { supabase } from '@/lib/supabase'
 import { SearchIcon, ChevronDownIcon, MapPinIcon } from './Icons'
 
 export default function Hero() {
   const router = useRouter()
   const [activeSlide, setActiveSlide] = useState(0)
+  const [heroImages, setHeroImages] = useState<string[]>(HERO_IMAGES)
   const [selectedProvince, setSelectedProvince] = useState('')
   const [selectedDistrict, setSelectedDistrict] = useState('')
   const [selectedType, setSelectedType] = useState('')
 
   const districts = selectedProvince ? PROVINCES[selectedProvince] ?? [] : []
 
-  const nextSlide = useCallback(() => {
-    setActiveSlide((prev) => (prev + 1) % HERO_IMAGES.length)
+  // Load platform-managed hero images (falls back to defaults)
+  useEffect(() => {
+    supabase.rpc('get_hero_images').then(({ data }) => {
+      const rows = (data ?? []) as { image_url: string }[]
+      if (rows.length > 0) {
+        setHeroImages(rows.map(r => r.image_url))
+        setActiveSlide(0)
+      }
+    })
   }, [])
+
+  const nextSlide = useCallback(() => {
+    setActiveSlide((prev) => (prev + 1) % heroImages.length)
+  }, [heroImages.length])
 
   useEffect(() => {
     const interval = setInterval(nextSlide, 6000)
@@ -34,7 +47,7 @@ export default function Hero() {
   return (
     <section style={{ position: 'relative', height: '100vh', minHeight: 640, overflow: 'hidden' }}>
       {/* Slides */}
-      {HERO_IMAGES.map((img, i) => (
+      {heroImages.map((img, i) => (
         <div
           key={img}
           className={`hero-slide${i === activeSlide ? ' active' : ''}`}
@@ -321,7 +334,7 @@ export default function Hero() {
           zIndex: 10,
         }}
       >
-        {HERO_IMAGES.map((_, i) => (
+        {heroImages.map((_, i) => (
           <button
             key={i}
             onClick={() => setActiveSlide(i)}
@@ -334,7 +347,7 @@ export default function Hero() {
 
       {/* Prev/next arrows */}
       <button
-        onClick={() => setActiveSlide((prev) => (prev - 1 + HERO_IMAGES.length) % HERO_IMAGES.length)}
+        onClick={() => setActiveSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
         style={{
           position: 'absolute',
           left: 20,
