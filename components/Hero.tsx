@@ -17,11 +17,18 @@ export default function Hero() {
   const districts = selectedProvince ? PROVINCES[selectedProvince] ?? [] : []
 
   // Load platform-managed hero images (falls back to defaults)
+  // Old seed rows store a full external URL; new uploads store a storage
+  // object path in the "platform-assets" bucket — resolve whichever we have.
   useEffect(() => {
     supabase.rpc('get_hero_images').then(({ data }) => {
       const rows = (data ?? []) as { image_url: string }[]
       if (rows.length > 0) {
-        setHeroImages(rows.map(r => r.image_url))
+        const resolved = rows.map(r =>
+          r.image_url.startsWith('http')
+            ? r.image_url
+            : supabase.storage.from('platform-assets').getPublicUrl(r.image_url).data.publicUrl
+        )
+        setHeroImages(resolved)
         setActiveSlide(0)
       }
     })
