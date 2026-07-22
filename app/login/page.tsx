@@ -192,12 +192,63 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
-            <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>← Back to home</Link>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-              <a href="https://app.rentcartours.com/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>Staff Login →</a>
-              <a href="https://app.rentcartours.com/register" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>List Your Fleet →</a>
+          {/* Rental company callout */}
+          <div
+            style={{
+              marginTop: 28,
+              padding: '16px 18px',
+              borderRadius: 12,
+              background: 'rgba(220,40,40,0.06)',
+              border: '1px solid rgba(220,40,40,0.2)',
+            }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+              Own a rental company?
+            </p>
+            <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.45)', marginBottom: 12, lineHeight: 1.5 }}>
+              List your fleet and manage bookings with our partner dashboard.
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <a
+                href="https://app.rentcartours.com/"
+                style={{
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  background: '#dc2828',
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Rent A Car Login
+              </a>
+              <a
+                href="https://app.rentcartours.com/register"
+                style={{
+                  flex: '1 1 auto',
+                  textAlign: 'center',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  background: 'transparent',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Register Your Company
+              </a>
             </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textDecoration: 'none' }}>← Back to home</Link>
           </div>
         </div>
       </div>
