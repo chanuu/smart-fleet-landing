@@ -76,7 +76,10 @@ async function getVehicles(): Promise<VehicleListing[]> {
       return { ...v, image_url: data?.publicUrl ?? null }
     })
 
-    return withImages
+    // De-prioritize vehicles without a photo — push them to the end while
+    // preserving relative order otherwise (also enforced in the RPC's
+    // ORDER BY; this is a client-side safety net).
+    return withImages.sort((a, b) => Number(!a.image_url) - Number(!b.image_url))
   } catch {
     return []
   }
@@ -126,7 +129,7 @@ export default async function LandingPage() {
     <main style={{ background: '#0a0a0a' }}>
       <JsonLd />
       <TopNav />
-      <Hero />
+      <Hero vehicles={vehicles} />
       <Suspense fallback={<VehicleSectionFallback />}>
         <VehicleSection vehicles={vehicles} />
       </Suspense>

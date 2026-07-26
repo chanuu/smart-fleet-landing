@@ -1,6 +1,7 @@
 export interface VehicleListing {
   vehicle_id: string
   tenant_id: string
+  tenant_name: string | null
   registration_number: string
   brand: string
   model_name: string | null

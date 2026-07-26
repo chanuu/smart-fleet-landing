@@ -182,6 +182,12 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
           >
             {displayName}
           </h3>
+          {vehicle.tenant_name && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(255,255,255,0.45)', fontSize: 11.5, marginBottom: location ? 3 : 0 }}>
+              <ShieldCheckIcon size={11} style={{ color: '#dc2828', flexShrink: 0 }} />
+              {vehicle.tenant_name}
+            </div>
+          )}
           {location && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(255,255,255,0.38)', fontSize: 12 }}>
               <MapPinIcon size={11} />

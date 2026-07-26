@@ -31,7 +31,8 @@ async function getVehicles(): Promise<VehicleListing[]> {
       return { ...v, image_url: data?.publicUrl ?? null }
     })
 
-    return withImages
+    // De-prioritize vehicles without a photo (also enforced in the RPC).
+    return withImages.sort((a, b) => Number(!a.image_url) - Number(!b.image_url))
   } catch {
     return []
   }

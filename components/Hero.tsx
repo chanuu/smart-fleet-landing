@@ -4,9 +4,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { HERO_IMAGES, PROVINCES, VEHICLE_TYPES, STATS } from '@/lib/data'
 import { supabase } from '@/lib/supabase'
+import type { VehicleListing } from '@/types'
 import { SearchIcon, ChevronDownIcon, MapPinIcon } from './Icons'
 
-export default function Hero() {
+interface HeroProps {
+  vehicles?: VehicleListing[]
+}
+
+export default function Hero({ vehicles = [] }: HeroProps) {
   const router = useRouter()
   const [activeSlide, setActiveSlide] = useState(0)
   const [heroImages, setHeroImages] = useState<string[]>(HERO_IMAGES)
@@ -14,7 +19,27 @@ export default function Hero() {
   const [selectedDistrict, setSelectedDistrict] = useState('')
   const [selectedType, setSelectedType] = useState('')
 
-  const districts = selectedProvince ? PROVINCES[selectedProvince] ?? [] : []
+  // Only offer provinces/districts/types that at least one available vehicle
+  // actually has — a static list would let a visitor search into a dead end.
+  // If no vehicle data was passed (e.g. fetch failure), fall back to the
+  // full static lists rather than leaving the search bar empty.
+  const hasVehicleData = vehicles.length > 0
+
+  const availableDistricts = new Set(
+    vehicles.map((v) => v.district_name).filter((d): d is string => !!d)
+  )
+  const availableTypes = hasVehicleData
+    ? Array.from(new Set(vehicles.map((v) => v.vehicle_type).filter((t): t is string => !!t))).sort()
+    : VEHICLE_TYPES
+  const availableProvinces = hasVehicleData
+    ? Object.keys(PROVINCES).filter((p) => PROVINCES[p].some((d) => availableDistricts.has(d)))
+    : Object.keys(PROVINCES)
+
+  const districts = selectedProvince
+    ? hasVehicleData
+      ? (PROVINCES[selectedProvince] ?? []).filter((d) => availableDistricts.has(d))
+      : PROVINCES[selectedProvince] ?? []
+    : []
 
   // Load platform-managed hero images (falls back to defaults)
   // Old seed rows store a full external URL; new uploads store a storage
@@ -190,7 +215,7 @@ export default function Hero() {
               }}
             >
               <option value="" style={{ background: '#131313' }}>Province</option>
-              {Object.keys(PROVINCES).map((p) => (
+              {availableProvinces.map((p) => (
                 <option key={p} value={p} style={{ background: '#131313' }}>{p}</option>
               ))}
             </select>
@@ -262,7 +287,7 @@ export default function Hero() {
               }}
             >
               <option value="" style={{ background: '#131313' }}>Vehicle Type</option>
-              {VEHICLE_TYPES.map((t) => (
+              {availableTypes.map((t) => (
                 <option key={t} value={t} style={{ background: '#131313' }}>{t}</option>
               ))}
             </select>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { VehicleListing } from '@/types'
-import { ALL_DISTRICTS, VEHICLE_TYPES } from '@/lib/data'
+import { ALL_DISTRICTS } from '@/lib/data'
 import VehicleCard from './VehicleCard'
 import { SearchIcon, SlidersIcon, XIcon } from './Icons'
 
@@ -28,6 +28,12 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
 
   // Compute max possible price from data
   const dataMaxPrice = Math.max(50000, ...vehicles.map((v) => v.base_rate ?? 0))
+
+  // Only show vehicle types that at least one available vehicle actually has —
+  // a static list would offer types with zero matching results.
+  const availableTypes = Array.from(
+    new Set(vehicles.map((v) => v.vehicle_type).filter((t): t is string => !!t))
+  ).sort()
 
   const filterVehicles = useCallback(() => {
     return vehicles.filter((v) => {
@@ -93,7 +99,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
       {/* Vehicle Type */}
       <FilterGroup label="Vehicle Type">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {VEHICLE_TYPES.map((t) => (
+          {availableTypes.map((t) => (
             <button
               key={t}
               onClick={() => setFilterType(filterType === t ? '' : t)}
