@@ -6,6 +6,22 @@ All notable changes to this project will be documented in this file.
 the change was safe to ship, or what deploy-order/verification step was needed. New entries should
 follow the same format — see the process note in `CLAUDE.md`.
 
+## 2026-08 — Live-site session log
+
+### Signup success screen shows entered email (2026-08-06)
+- Signup on `/login` no longer shows a small green banner and silently flips back to the sign-in
+  tab. It now replaces the form with a dedicated "check your email" card that names the exact
+  address just registered, warns sign-in won't work until confirmed, suggests checking spam, and
+  offers a "Resend verification email" action plus a "Go to Sign In" button (no auto-redirect).
+  Matching change made in `smart-fleet`'s `RegisterForm.tsx` — see that repo's `CHANGELOG.md`.
+- **Risk:** none — presentation only, reuses the existing `resendConfirmationEmail` context method,
+  no new network calls or schema changes.
+
+### Resend email verification (2026-08-06)
+- Login form now detects the "Email not confirmed" sign-in error and shows a "Resend verification
+  email" button. See `smart-fleet` `CHANGELOG.md` for the matching admin-app change.
+- **Risk:** none — additive only.
+
 ## 2026-07 — Live-site session log
 
 ### Password reset + change password for customers (2026-07-29)

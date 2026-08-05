@@ -10,7 +10,7 @@ type Tab = 'signin' | 'signup'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { user, loading, signIn, signUp } = useCustomerAuth()
+  const { user, loading, signIn, signUp, resendConfirmationEmail } = useCustomerAuth()
 
   const [tab, setTab]           = useState<Tab>('signin')
   const [email, setEmail]       = useState('')
@@ -20,12 +20,17 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState<string | null>(null)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
+  const [resendMsg, setResendMsg] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && user) router.replace('/my-bookings')
   }, [user, loading, router])
 
-  const reset = () => { setError(null); setSuccess(null) }
+  const reset = () => { setError(null); setSuccess(null); setNeedsConfirmation(false) }
+  const resetAll = () => { reset(); setRegisteredEmail(null); setResendMsg(null) }
 
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
@@ -43,15 +48,31 @@ export default function LoginPage() {
     setSubmitting(true)
     if (tab === 'signin') {
       const { error } = await signIn(email, password)
-      if (error) { setError(error); setSubmitting(false); return }
+      if (error) {
+        setError(error)
+        if (error.toLowerCase().includes('email not confirmed')) setNeedsConfirmation(true)
+        setSubmitting(false)
+        return
+      }
       router.push('/my-bookings')
     } else {
       const { error } = await signUp(email, password, { nic_number: nic.trim().toUpperCase() || undefined })
       if (error) { setError(error); setSubmitting(false); return }
-      setSuccess('Account created! Check your email to confirm, then sign in.')
-      setTab('signin')
+      setRegisteredEmail(email)
     }
     setSubmitting(false)
+  }
+
+  const handleResend = async () => {
+    setResending(true)
+    const { error } = await resendConfirmationEmail(needsConfirmation ? email : registeredEmail || email)
+    setResending(false)
+    if (registeredEmail) {
+      setResendMsg(error ?? 'Verification email sent again — check your inbox.')
+    } else {
+      setSuccess(error ? null : 'Verification email sent — check your inbox.')
+      if (error) setError(error)
+    }
   }
 
   if (loading) return null
@@ -68,6 +89,44 @@ export default function LoginPage() {
       {/* Form */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
         <div style={{ width: '100%', maxWidth: 420 }}>
+          {registeredEmail ? (
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '32px 24px', textAlign: 'center' }}>
+              <div style={{ margin: '0 auto 16px', width: 56, height: 56, borderRadius: '50%', background: 'rgba(220,40,40,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>
+                ✉️
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 10 }}>Verify your email address</h3>
+              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
+                We&apos;ve sent a confirmation link to{' '}
+                <strong style={{ color: '#fff', wordBreak: 'break-all' }}>{registeredEmail}</strong>.
+                Click the link in that email to activate your account — you won&apos;t be able to
+                sign in until it&apos;s confirmed.
+              </p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', marginTop: 12 }}>
+                Can&apos;t find it? Check your spam/junk folder — it can take a minute to arrive.
+              </p>
+
+              {resendMsg && <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 16 }}>{resendMsg}</p>}
+
+              <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                  style={{ background: 'none', border: 'none', padding: 0, color: '#D2042D', fontWeight: 700, fontSize: 13, cursor: resending ? 'not-allowed' : 'pointer', opacity: resending ? 0.5 : 1 }}
+                >
+                  {resending ? 'Sending…' : 'Resend verification email'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { resetAll(); setTab('signin') }}
+                  style={{ marginTop: 4, padding: '11px', borderRadius: 10, border: 'none', background: '#dc2828', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Go to Sign In
+                </button>
+              </div>
+            </div>
+          ) : (
+          <>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 6, textAlign: 'center' }}>
             {tab === 'signin' ? 'Welcome back' : 'Create account'}
           </h1>
@@ -168,8 +227,18 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontSize: 13, color: '#f87171' }}>
-                {error}
+              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, fontSize: 13, color: '#f87171', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <span>{error}</span>
+                {needsConfirmation && (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending || !email}
+                    style={{ alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0, color: '#fff', fontWeight: 700, fontSize: 12.5, textDecoration: 'underline', cursor: resending ? 'not-allowed' : 'pointer' }}
+                  >
+                    {resending ? 'Sending…' : 'Resend verification email'}
+                  </button>
+                )}
               </div>
             )}
             {success && (
@@ -198,6 +267,8 @@ export default function LoginPage() {
               {submitting ? 'Please wait…' : tab === 'signin' ? 'Sign In' : 'Create Account'}
             </button>
           </form>
+          </>
+          )}
 
           {/* Rental company callout */}
           <div
