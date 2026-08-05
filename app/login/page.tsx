@@ -123,7 +123,14 @@ export default function LoginPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Password</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
+                  {tab === 'signin' && (
+                    <Link href="/forgot-password" style={{ fontSize: 12, color: '#D2042D', fontWeight: 600, textDecoration: 'none' }}>
+                      Forgot password?
+                    </Link>
+                  )}
+                </div>
                 <input
                   type="password"
                   value={password}

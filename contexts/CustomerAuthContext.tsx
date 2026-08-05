@@ -11,6 +11,8 @@ interface CustomerAuthContextValue {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string, metadata?: { nic_number?: string }) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  resetPasswordForEmail: (email: string) => Promise<{ error: string | null }>
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>
 }
 
 const CustomerAuthContext = createContext<CustomerAuthContextValue | null>(null)
@@ -56,8 +58,20 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     await supabase.auth.signOut()
   }
 
+  const resetPasswordForEmail = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://rentcartours.com/reset-password',
+    })
+    return { error: error?.message ?? null }
+  }
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    return { error: error?.message ?? null }
+  }
+
   return (
-    <CustomerAuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <CustomerAuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, resetPasswordForEmail, updatePassword }}>
       {children}
     </CustomerAuthContext.Provider>
   )

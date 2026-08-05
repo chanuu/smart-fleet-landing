@@ -125,6 +125,91 @@ function ProfileCard({ user }: { user: NonNullable<ReturnType<typeof useCustomer
   )
 }
 
+// ---- Change password card ----
+
+function ChangePasswordCard() {
+  const { updatePassword } = useCustomerAuth()
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const handleSave = async () => {
+    setMsg(null)
+    if (password.length < 6) {
+      setMsg({ ok: false, text: 'Password must be at least 6 characters.' })
+      return
+    }
+    if (password !== confirm) {
+      setMsg({ ok: false, text: 'Passwords do not match.' })
+      return
+    }
+    setSaving(true)
+    const { error } = await updatePassword(password)
+    setSaving(false)
+    if (error) {
+      setMsg({ ok: false, text: error })
+    } else {
+      setPassword('')
+      setConfirm('')
+      setMsg({ ok: true, text: 'Password updated.' })
+    }
+  }
+
+  return (
+    <div style={{ background: '#131313', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px 24px', marginBottom: 36 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 }}>
+        Change Password
+      </h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
+        <div>
+          <label style={profileLabelStyle}>New Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Min. 6 characters"
+            style={profileInputStyle}
+          />
+        </div>
+        <div>
+          <label style={profileLabelStyle}>Confirm New Password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            placeholder="Repeat new password"
+            style={profileInputStyle}
+          />
+        </div>
+        <div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 8,
+              border: 'none',
+              background: saving ? 'rgba(210,4,45,0.5)' : '#D2042D',
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {saving ? 'Updating…' : 'Update Password'}
+          </button>
+        </div>
+      </div>
+
+      {msg && (
+        <p style={{ marginTop: 10, fontSize: 13, color: msg.ok ? '#4ade80' : '#f87171' }}>{msg.text}</p>
+      )}
+    </div>
+  )
+}
+
 const profileLabelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 10,
@@ -473,6 +558,9 @@ export default function MyBookingsPage() {
 
         {/* Profile */}
         <ProfileCard user={user} />
+
+        {/* Change Password */}
+        <ChangePasswordCard />
 
         {/* Trust Score */}
         {!fetching && (

@@ -8,6 +8,19 @@ follow the same format — see the process note in `CLAUDE.md`.
 
 ## 2026-07 — Live-site session log
 
+### Password reset + change password for customers (2026-07-29)
+- Added `/forgot-password` and `/reset-password` pages, plus a "Forgot password?" link on the
+  sign-in tab of `/login`. Added a "Change Password" card to `/my-bookings` for logged-in
+  customers. `CustomerAuthContext` gained `resetPasswordForEmail` and `updatePassword` methods.
+- Matching feature added on the admin app (`smart-fleet`) for tenant owners/staff — see that
+  repo's `CHANGELOG.md`.
+- **Risk:** none — purely additive pages/context methods, no schema changes, existing
+  `signIn`/`signUp` untouched.
+- **Action required:** add `https://rentcartours.com/reset-password` to Supabase Dashboard →
+  Authentication → URL Configuration → Redirect URLs, otherwise Supabase falls back to the
+  default Site URL instead of honoring `emailRedirectTo` (same gotcha noted for the earlier
+  signup-confirmation redirect fix).
+
 ### Vehicle cards: company name + image-first sort (2026-07-26)
 - Each vehicle card now shows the rental company name (`tenant_name`, joined server-side in the
   admin app's public RPCs). Vehicles with no photo now sort to the end of both the homepage
