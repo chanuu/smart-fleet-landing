@@ -8,6 +8,19 @@ follow the same format — see the process note in `CLAUDE.md`.
 
 ## 2026-08 — Live-site session log
 
+### Invoice page redesign: company branding, KM breakdown, fixed 0 total (2026-08-16)
+- `/invoice/[rentalId]` redesigned as a proper invoice: company logo (signed URL from the
+  `tenant-assets` bucket, same resolution pattern as `app/companies/[tenantId]/page.tsx`),
+  address and phone in the header, included/driven/extra kilometers with the extra-km rate, and
+  a clean line-item breakdown for closed rentals.
+- Fixed the total showing `LKR 0.00` for any rental that hadn't been closed yet (the common case,
+  since this link goes out on `rental_created`, before there's a final total) — now shows a
+  clearly labeled "Estimated Total" from the rate plan, plus advance payment and total paid,
+  which are tracked live regardless of whether the rental has closed.
+- Backed by the updated `get_public_rental_receipt` RPC — see `smart-fleet`'s `CHANGELOG.md`.
+- **Risk:** none — same page/route, only content and the backing RPC's shape changed.
+- **Deploy order:** requires the updated RPC migration (from `smart-fleet`) applied first.
+
 ### Public rental receipt page (2026-08-16)
 - New page `/invoice/[rentalId]` — a public, no-login receipt (vehicle, dates, charge
   breakdown, total, amount paid, balance due) for a single rental. Powered by a new
