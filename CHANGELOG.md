@@ -8,6 +8,19 @@ follow the same format — see the process note in `CLAUDE.md`.
 
 ## 2026-08 — Live-site session log
 
+### Public rental receipt page (2026-08-16)
+- New page `/invoice/[rentalId]` — a public, no-login receipt (vehicle, dates, charge
+  breakdown, total, amount paid, balance due) for a single rental. Powered by a new
+  `SECURITY DEFINER` RPC `get_public_rental_receipt(uuid)` (migration lives in the `smart-fleet`
+  repo, shared Supabase project — see that repo's `CHANGELOG.md`), granted to `anon`. The admin
+  app now texts this link to customers on rental-created/rental-closed SMS.
+- **Risk:** low — new page and RPC only, nothing existing touched. The RPC exposes rental
+  amounts/dates/vehicle/customer-name to anyone holding the link (the link itself, an unguessable
+  uuid, is the access control — no NIC/license/other-customer/other-tenant data is exposed).
+- **Deploy order:** requires the `get_public_rental_receipt` migration (from `smart-fleet`) to be
+  applied to the shared Supabase project before this page will resolve real data — visiting the
+  page before that returns a 404 (RPC not found), not an error page.
+
 ### Signup success screen shows entered email (2026-08-06)
 - Signup on `/login` no longer shows a small green banner and silently flips back to the sign-in
   tab. It now replaces the form with a dedicated "check your email" card that names the exact
