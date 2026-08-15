@@ -11,8 +11,9 @@ follow the same format — see the process note in `CLAUDE.md`.
 ### Invoice page redesign: company branding, KM breakdown, fixed 0 total (2026-08-16)
 - `/invoice/[rentalId]` redesigned as a proper invoice: company logo (signed URL from the
   `tenant-assets` bucket, same resolution pattern as `app/companies/[tenantId]/page.tsx`),
-  address and phone in the header, included/driven/extra kilometers with the extra-km rate, and
-  a clean line-item breakdown for closed rentals.
+  address and phone in the header, included/driven/extra kilometers, a clean line-item
+  breakdown for closed rentals, and an always-visible "Rate plan details" note stating the
+  included KM allowance and the extra-km rate (not just when an overage was actually incurred).
 - Fixed the total showing `LKR 0.00` for any rental that hadn't been closed yet (the common case,
   since this link goes out on `rental_created`, before there's a final total) — now shows a
   clearly labeled "Estimated Total" from the rate plan, plus advance payment and total paid,

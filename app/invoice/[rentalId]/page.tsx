@@ -201,6 +201,12 @@ export default async function RentalReceiptPage({ params }: { params: Promise<{ 
                 <span>{value}</span>
               </div>
             ))}
+            {(includedKm != null || receipt.extra_rate_per_km != null) && (
+              <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>
+                Rate plan details: includes {includedKm != null ? `${includedKm.toLocaleString()} km` : 'a set distance'}
+                {receipt.extra_rate_per_km != null && ` — additional distance charged at Rs ${receipt.extra_rate_per_km.toLocaleString()}/km`}.
+              </p>
+            )}
           </div>
 
           {/* Totals */}
