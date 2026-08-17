@@ -2,11 +2,13 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import type { TenantDetail, VehicleListing } from '@/types'
-import TopNav from '@/components/TopNav'
-import Footer from '@/components/Footer'
+import type { TenantDetail, VehicleListing, PublicProfile } from '@/types'
+import CompanyTopNav from '@/components/CompanyTopNav'
+import CompanyFooter from '@/components/CompanyFooter'
 import CompanyProfileClient from '@/components/CompanyProfileClient'
 import { ShieldCheckIcon } from '@/components/Icons'
+import CompanyImageWithFallback from '@/components/CompanyImageWithFallback'
+import { archivo, jetbrainsMono, fontSans, theme, monoLabel } from '@/lib/companyTheme'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,10 +59,28 @@ export async function generateMetadata({ params }: { params: Promise<{ tenantId:
   const { tenantId } = await params
   const result = await getTenantData(tenantId)
   if (!result) return { title: 'Company Not Found — Rent Car Tours' }
-  const { tenant } = result
+  const { tenant, vehicles } = result
+  const title = `${tenant.name} — Rent Car Tours`
+  const description = `Rent a vehicle from ${tenant.name}${tenant.district_name ? ' in ' + tenant.district_name : ''}, Sri Lanka. ${vehicles.length} vehicles available.`
+  const canonical = `https://www.rentcartours.com/companies/${tenant.tenant_id}`
   return {
-    title: `${tenant.name} — Rent Car Tours`,
-    description: `Rent a vehicle from ${tenant.name}${tenant.district_name ? ' in ' + tenant.district_name : ''}, Sri Lanka. ${tenant.vehicle_count} vehicles available.`,
+    title,
+    description,
+    alternates: { canonical },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: 'website',
+      siteName: 'Rent Car Tours',
+      images: tenant.logo_url ? [{ url: tenant.logo_url }] : undefined,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
   }
 }
 
@@ -75,240 +95,216 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
   const location = tenant.district_name ?? 'Sri Lanka'
   const since = new Date().getFullYear() - years
 
+  const featured = vehicles.find((v) => v.image_url) ?? vehicles[0]
+  const thumbs = vehicles.filter((v) => v.vehicle_id !== featured?.vehicle_id).slice(0, 3)
+
   return (
-    <main style={{ background: '#0a0a0a', minHeight: '100vh' }}>
-      <TopNav />
+    <main
+      className={`${archivo.variable} ${jetbrainsMono.variable}`}
+      style={{ background: theme.bg, minHeight: '100vh', fontFamily: fontSans, color: '#f2f2f3', WebkitFontSmoothing: 'antialiased' }}
+    >
+      <CompanyTopNav tenantId={tenant.tenant_id} tenantName={tenant.name} logoUrl={tenant.logo_url} initials={initials} />
 
-      {/* Banner */}
-      <div
-        style={{
-          position: 'relative',
-          height: 220,
-          overflow: 'hidden',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
+      {/* Hero */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '56px 24px', borderBottom: `1px solid ${theme.border}` }}>
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: `
-              radial-gradient(ellipse 800px 300px at 30% 50%, rgba(220,40,40,0.12), transparent 60%),
-              radial-gradient(ellipse 600px 240px at 80% 20%, rgba(220,40,40,0.06), transparent 60%),
-              linear-gradient(180deg, #131313 0%, #0a0a0a 100%)
-            `,
+            background: `radial-gradient(90% 120% at 12% 0%, rgba(225,29,46,0.20) 0%, rgba(225,29,46,0) 55%), radial-gradient(70% 90% at 95% 20%, rgba(225,29,46,0.09) 0%, rgba(8,8,10,0) 60%)`,
+            pointerEvents: 'none',
           }}
         />
-        {/* Grid overlay */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-            maskImage: 'radial-gradient(ellipse 80% 70% at 50% 30%, black 30%, transparent 80%)',
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+            maskImage: 'linear-gradient(to bottom, #000, transparent 85%)',
+            pointerEvents: 'none',
           }}
         />
-        {/* Breadcrumb */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: '36px 24px 0' }}>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-            <Link href="/" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Home</Link>
-            <span>/</span>
-            <Link href="/#companies" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Rental Partners</Link>
-            <span>/</span>
-            <span style={{ color: '#fff' }}>{tenant.name}</span>
-          </nav>
-        </div>
-      </div>
 
-      {/* Company overview card — overlaps the banner */}
-      <div style={{ position: 'relative', zIndex: 5, marginTop: -100, paddingBottom: 24 }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
-          <div
-            style={{
-              background: '#131313',
-              border: '1px solid rgba(255,255,255,0.10)',
-              borderRadius: 22,
-              padding: 36,
-              boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
-            }}
-          >
-            {/* Head row */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 28,
-                paddingBottom: 28,
-                borderBottom: '1px solid rgba(255,255,255,0.07)',
-                marginBottom: 28,
-                flexWrap: 'wrap',
-              }}
-              className="overview-head-responsive"
-            >
-              {/* Logo */}
+        <div
+          style={{ position: 'relative', maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 48, alignItems: 'start' }}
+          className="hero-grid-responsive"
+        >
+          {/* Left — info */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7, padding: '6px 11px', borderRadius: 999,
+                  background: theme.accentSoftBg, border: `1px solid ${theme.accentSoftBorder}`,
+                  ...monoLabel, fontSize: 10.5,
+                }}
+              >
+                <ShieldCheckIcon size={12} />
+                Verified operator
+              </span>
+              <span style={{ ...monoLabel, color: theme.textFainter }}>
+                {location.toUpperCase()} · SINCE {since}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, flexWrap: 'wrap' }}>
               {tenant.logo_url ? (
                 <img
                   src={tenant.logo_url}
                   alt={tenant.name}
-                  style={{
-                    width: 110,
-                    height: 110,
-                    borderRadius: 22,
-                    objectFit: 'cover',
-                    border: '1.5px solid rgba(255,255,255,0.10)',
-                    boxShadow: '0 12px 36px rgba(0,0,0,0.4)',
-                    flexShrink: 0,
-                    background: '#1a1a1a',
-                  }}
+                  style={{ flexShrink: 0, width: 76, height: 76, borderRadius: 18, objectFit: 'cover', boxShadow: '0 10px 32px rgba(0,0,0,0.5)', background: '#fff' }}
                 />
               ) : (
                 <div
                   style={{
-                    width: 110,
-                    height: 110,
-                    borderRadius: 22,
-                    background: '#dc2828',
-                    display: 'grid',
-                    placeItems: 'center',
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: 42,
-                    letterSpacing: '-0.03em',
-                    boxShadow: '0 12px 36px rgba(220,40,40,0.25)',
-                    flexShrink: 0,
+                    flexShrink: 0, width: 76, height: 76, borderRadius: 18, background: '#fff',
+                    display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 22, color: theme.accent,
+                    letterSpacing: '-0.03em', boxShadow: '0 10px 32px rgba(0,0,0,0.5)',
                   }}
                 >
                   {initials}
                 </div>
               )}
-
-              {/* Info */}
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <h1
-                  style={{
-                    fontSize: 'clamp(24px, 4vw, 38px)',
-                    fontWeight: 800,
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1.05,
-                    color: '#fff',
-                    marginBottom: 14,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                  }}
-                >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 200 }}>
+                <h1 style={{ margin: 0, fontWeight: 800, fontSize: 'clamp(30px, 4.2vw, 50px)', lineHeight: 1, letterSpacing: '-0.035em', color: '#fff' }}>
                   {tenant.name}
-                  <ShieldCheckIcon size={28} style={{ color: '#dc2828' }} />
                 </h1>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {[
-                    {
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
-                          <path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/>
-                          <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                      ),
-                      content: `${location}, Sri Lanka`,
-                    },
-                    {
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
-                          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                        </svg>
-                      ),
-                      content: `Since ${since}`,
-                    },
-                    {
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#dc2828' }}>
-                          <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="16" r="1"/>
-                        </svg>
-                      ),
-                      content: `${vehicles.length} vehicles`,
-                    },
-                  ].map((pill, idx) => (
-                    <span
-                      key={idx}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '7px 12px',
-                        background: '#0a0a0a',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 999,
-                        fontSize: 13,
-                        color: 'rgba(255,255,255,0.55)',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {pill.icon}
-                      {pill.content}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
-                {tenant.phone && (
-                  <a
-                    href={`tel:${tenant.phone}`}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600,
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                      color: '#fff', textDecoration: 'none',
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l.94-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/>
-                    </svg>
-                    Call
-                  </a>
-                )}
-                <Link
-                  href={`/companies/${tenant.tenant_id}#contact`}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700,
-                    background: '#dc2828', color: '#fff', textDecoration: 'none',
-                  }}
-                >
-                  Message →
-                </Link>
+                <p style={{ margin: 0, maxWidth: '44ch', fontSize: 15.5, lineHeight: 1.6, color: theme.textMuted }}>
+                  {(tenant.public_profile as PublicProfile | undefined)?.about?.slice(0, 180)
+                    ?? `Vehicle rentals in ${location}, Sri Lanka — booked directly with the operator.`}
+                </p>
               </div>
             </div>
 
-            {/* Stats bar */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }} className="stats-bar-responsive">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {[
-                { num: vehicles.length, label: 'Vehicles Available', amber: true },
-                { num: `${years}+`, label: 'Years Experience' },
-                { num: (tenant.vehicle_types ?? []).length, label: 'Vehicle Types' },
-                { num: '24/7', label: 'Customer Support', amber: true },
-              ].map((s, idx) => (
-                <div
-                  key={s.label}
+                `${location}, Sri Lanka`,
+                `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'} available`,
+                `${(tenant.vehicle_types ?? []).length} categories`,
+              ].map((t) => (
+                <span
+                  key={t}
                   style={{
-                    textAlign: 'center',
-                    padding: '14px 0',
-                    borderRight: idx < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                    display: 'flex', alignItems: 'center', gap: 7, padding: '8px 13px', borderRadius: 8,
+                    background: 'rgba(255,255,255,0.045)', border: `1px solid ${theme.border}`,
+                    fontSize: 12.5, fontWeight: 500, color: 'rgba(255,255,255,0.72)',
                   }}
                 >
-                  <div style={{ fontSize: 28, fontWeight: 800, color: s.amber ? '#dc2828' : '#fff', letterSpacing: '-0.02em' }}>
-                    {s.num}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{s.label}</div>
+                  <span style={{ width: 5, height: 5, borderRadius: 99, background: theme.accent, flexShrink: 0 }} />
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+              <Link
+                href={`/companies/${tenant.tenant_id}#contact`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '15px 26px', borderRadius: 12,
+                  background: theme.accent, fontSize: 14.5, fontWeight: 700, color: '#fff',
+                  textDecoration: 'none', boxShadow: '0 12px 34px rgba(225,29,46,0.32)',
+                }}
+              >
+                Message owner →
+              </Link>
+              {tenant.phone && (
+                <a
+                  href={`tel:${tenant.phone}`}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '15px 24px', borderRadius: 12,
+                    border: `1px solid ${theme.borderStrong}`, fontSize: 14.5, fontWeight: 600, color: '#fff', textDecoration: 'none',
+                  }}
+                >
+                  Call {tenant.phone}
+                </a>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: theme.border, border: `1px solid ${theme.border}`, borderRadius: 14, overflow: 'hidden', marginTop: 6 }}
+              className="stats-bar-responsive"
+            >
+              {[
+                { num: vehicles.length, label: 'Vehicles', accent: true },
+                { num: (tenant.vehicle_types ?? []).length, label: 'Categories' },
+                { num: `${years}+`, label: 'Years active' },
+                { num: '24/7', label: 'Support', accent: true },
+              ].map((s) => (
+                <div key={s.label} style={{ background: theme.cardAlt, padding: '20px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={{ fontWeight: 800, fontSize: 30, lineHeight: 1, letterSpacing: '-0.03em', color: s.accent ? theme.accent : '#fff' }}>{s.num}</span>
+                  <span style={{ ...monoLabel, color: theme.textFaint }}>{s.label}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Right — featured vehicle */}
+          {featured && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <Link
+                href={`/vehicles/${featured.vehicle_id}`}
+                style={{ position: 'relative', display: 'block', border: `1px solid ${theme.border}`, borderRadius: 20, overflow: 'hidden', background: theme.card, textDecoration: 'none' }}
+              >
+                <div style={{ position: 'relative', height: 340, background: theme.cardAlt }}>
+                  <CompanyImageWithFallback
+                    src={featured.image_url ?? null}
+                    alt={featured.brand}
+                    label={`${featured.brand}${featured.model_name ? ` ${featured.model_name}` : ''}`}
+                  />
+                  <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 8 }}>
+                    <span style={{ padding: '6px 11px', borderRadius: 7, background: 'rgba(8,8,10,0.75)', border: `1px solid ${theme.borderStrong}`, ...monoLabel, fontSize: 10.5, color: '#fff' }}>
+                      Most booked
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, padding: '20px 22px', borderTop: `1px solid ${theme.border}` }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    <span style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>
+                      {featured.brand}{featured.model_name ? ` ${featured.model_name}` : ''}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 500, color: theme.textFaint }}>
+                      {[featured.seating_capacity ? `${featured.seating_capacity} seats` : null, featured.transmission, featured.fuel_type, featured.base_kilometers ? `${featured.base_kilometers} km/day` : null].filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: theme.accent }}>
+                      {featured.base_rate ? `LKR ${featured.base_rate.toLocaleString()}` : 'Contact'}
+                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.textFaint }}> /{featured.rental_type === 'monthly' ? 'mo' : 'day'}</span>
+                    </span>
+                    <span style={{ padding: '9px 16px', borderRadius: 9, background: theme.accent, fontSize: 12.5, fontWeight: 700, color: '#fff' }}>
+                      Book Now
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {thumbs.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${thumbs.length}, 1fr)`, gap: 12 }}>
+                  {thumbs.map((v) => (
+                    <Link
+                      key={v.vehicle_id}
+                      href={`/vehicles/${v.vehicle_id}`}
+                      style={{
+                        position: 'relative', height: 86, border: `1px solid ${theme.border}`, borderRadius: 12, overflow: 'hidden',
+                        background: theme.cardAlt, display: 'block', textDecoration: 'none',
+                      }}
+                    >
+                      <CompanyImageWithFallback
+                        src={v.image_url ?? null}
+                        alt={v.brand}
+                        label={`${v.brand}${v.model_name ? ` ${v.model_name}` : ''}`}
+                        labelSize={9.5}
+                      />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      </div>
+      </section>
 
       {/* Tabs + content (client) */}
       <CompanyProfileClient
@@ -317,15 +313,14 @@ export default async function CompanyProfilePage({ params }: { params: Promise<{
         years={years}
       />
 
-      <Footer />
+      <CompanyFooter tenantName={tenant.name} logoUrl={tenant.logo_url} initials={initials} phone={tenant.phone} />
 
       <style>{`
-        @media (max-width: 860px) {
-          .overview-head-responsive { flex-direction: column; align-items: center; text-align: center; }
+        @media (max-width: 900px) {
+          .hero-grid-responsive { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 700px) {
           .stats-bar-responsive { grid-template-columns: repeat(2, 1fr) !important; }
-          .stats-bar-responsive > div { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.07); }
-          .stats-bar-responsive > div:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.07) !important; }
-          .stats-bar-responsive > div:nth-last-child(-n+2) { border-bottom: none; }
         }
       `}</style>
     </main>

@@ -98,6 +98,8 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
               <Link
                 key={tenant.tenant_id}
                 href={`/companies/${tenant.tenant_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="card-hover"
                 style={{
                   background: '#131313',

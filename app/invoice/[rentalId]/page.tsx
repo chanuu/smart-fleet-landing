@@ -13,6 +13,8 @@ interface RentalReceipt {
   end_date: string
   start_time: string | null
   end_time: string | null
+  expected_return_date: string | null
+  expected_return_time: string | null
   booked_days: number | null
   total_kilometers: number | null
   total_days: number | null
@@ -166,7 +168,13 @@ export default async function RentalReceiptPage({ params }: { params: Promise<{ 
             </div>
             <div>
               <p style={{ color: '#9ca3af', marginBottom: 2 }}>{isFinal ? 'Return' : 'Expected Return'}</p>
-              <p style={{ color: '#111', fontWeight: 600 }}>{receipt.end_date}{receipt.end_time ? ` ${receipt.end_time.slice(0, 5)}` : ''}</p>
+              <p style={{ color: '#111', fontWeight: 600 }}>
+                {isFinal
+                  ? `${receipt.end_date}${receipt.end_time ? ` ${receipt.end_time.slice(0, 5)}` : ''}`
+                  : receipt.expected_return_date
+                    ? `${receipt.expected_return_date}${receipt.expected_return_time ? ` ${receipt.expected_return_time.slice(0, 5)}` : ''}`
+                    : '—'}
+              </p>
             </div>
             {receipt.rate_plan_name && (
               <div>

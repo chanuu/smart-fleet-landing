@@ -8,6 +8,73 @@ follow the same format — see the process note in `CLAUDE.md`.
 
 ## 2026-08 — Live-site session log
 
+### Company profile: two-column hero, fleet header rate note, SEO metadata (2026-08-18)
+- Hero rebuilt to match the design sample's two-column layout: left (badge/title/description/
+  amenity pills/CTAs/stats, all real data as before), right (a "Most booked" featured-vehicle
+  panel + 3 thumbnails — first vehicle with a photo, real name/specs/price, linking to
+  `/vehicles/[id]`). New `CompanyImageWithFallback.tsx` gives these hero images the same
+  graceful placeholder-pattern fallback `CompanyVehicleCard` already had for a missing/broken
+  photo, instead of a broken-image icon.
+- Fleet tab header now also shows a real rate note ("Rates include N km per day. Extra km billed
+  at LKR X...") derived from the fleet's own rate-plan data, and the heading uses the fleet's
+  total count instead of the filtered count (matches the sample; stays stable as filters change).
+- **SEO**: `generateMetadata` for this route now sets `alternates.canonical`, an explicit
+  `robots: { index: true, follow: true }`, and Open Graph/Twitter card tags — it was previously
+  title/description only. The page was already reachable (listed in `sitemap.xml`, not blocked
+  by `robots.txt`), so this makes the existing indexability more explicit/robust (canonical URL,
+  social preview cards) rather than fixing a page that wasn't indexable before.
+- **Risk:** none — presentation + metadata only, same page, no new data dependencies beyond
+  fields already fetched.
+
+### Company profile page restyled to match design sample (2026-08-17)
+- Full visual reskin of `/companies/[tenantId]` to match a provided design sample: Archivo
+  (headings/body) + JetBrains Mono (uppercase mono labels) via `next/font/google`, scoped to
+  this page only (`lib/companyTheme.ts` — fonts applied via CSS variables on the page's root
+  `<main>`, so the rest of the site stays on Inter). New dark palette (`#08080a` background,
+  `#0d0d10` cards, `#e11d2e` accent red) replacing the previous `#0a0a0a`/`#131313`/`#dc2828`
+  set, pill-shaped buttons/badges/filter-chips, and a redesigned hero (verified-operator badge,
+  stat tiles, message/call CTAs) — all driven by the same real data as before (vehicle counts,
+  years active, categories, contact info).
+- New `CompanyVehicleCard.tsx` — a page-scoped fleet-card variant restyled to match, used only
+  in the Fleet tab. Left `VehicleCard.tsx` itself untouched since it's shared with `/browse` and
+  the homepage — restyling it would have reskinned the whole site, not just this page.
+- `CompanyTopNav.tsx` and `CompanyFooter.tsx` (from the earlier white-label change) recolored to
+  match; `CompanyProfileClient.tsx`'s sticky tab bar offset adjusted (`top: 66`) since the nav is
+  now a bit taller than the old fixed 64px shell.
+- **Risk:** none — presentation only, this one page's components only; all existing behavior
+  (tab switching, fleet filtering, booking links, sign-in/my-bookings, contact form, WhatsApp/
+  Google-review links) is unchanged, verified via screenshots of all four tabs before and after.
+
+### Rental partner cards open profile in a new tab (2026-08-17)
+- Homepage "Rental Partners" cards (`PartnersSection.tsx`) now open `/companies/[tenantId]` in a
+  new tab (`target="_blank" rel="noopener noreferrer"`) instead of navigating away — makes more
+  sense now that the profile page is white-labeled to look like the tenant's own site, so
+  visitors don't lose their place on rentcartours.com.
+- **Risk:** none — link behavior only.
+
+### Company profile page white-labeled (2026-08-17)
+- `/companies/[tenantId]` now uses new `CompanyTopNav`/`CompanyFooter` components instead of the
+  platform-wide `TopNav`/`Footer` — no Rent Car Tours logo, no marketplace nav links
+  (Home/Browse Vehicles), and the breadcrumb ("Home / Rental Partners / …") is removed. The nav
+  shows the tenant's own logo/name (linking to their own profile page) instead, so the page reads
+  as the tenant's own site. Sign-in/My Bookings/account menu are kept working as before (bookings
+  still run through the shared rentcartours.com customer account system) — `CompanyTopNav` is a
+  trimmed copy of `TopNav` with the platform branding swapped for the tenant's. Footer keeps a
+  small "Bookings powered by Rent Car Tours" credit line rather than removing platform attribution
+  entirely.
+- **Risk:** none — presentation only, this one page's layout only; no other pages, no RPCs, no
+  auth logic changed. `CompanyProfileClient`'s internal sticky tab bar (`top: 72`) still lines up
+  correctly since the new nav is the same 64px height as the one it replaced.
+
+### Fixed wrong "Expected Return" date (2026-08-16)
+- `/invoice/[rentalId]` was showing today's date as "Expected Return" for any rental that hasn't
+  been closed yet — it was reading `end_date`, which is just a same-as-start-date placeholder
+  until the rental closes. Now reads `expected_return_date`/`expected_return_time` (backed by
+  the updated `get_public_rental_receipt` RPC — see `smart-fleet`'s `CHANGELOG.md`) for any
+  rental still active/pending; closed rentals still correctly show the real `end_date`.
+- **Risk:** none — display-only fix.
+- **Deploy order:** requires the updated RPC migration (from `smart-fleet`) applied first.
+
 ### Invoice page redesign: company branding, KM breakdown, fixed 0 total (2026-08-16)
 - `/invoice/[rentalId]` redesigned as a proper invoice: company logo (signed URL from the
   `tenant-assets` bucket, same resolution pattern as `app/companies/[tenantId]/page.tsx`),
