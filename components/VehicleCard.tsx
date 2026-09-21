@@ -35,8 +35,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
       : vehicle.fuel_type ?? '—'
 
   return (
-    <Link
-      href={`/vehicles/${vehicle.vehicle_id}`}
+    <article
       className="card-hover"
       style={{
         background: '#131313',
@@ -45,11 +44,18 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        isolation: 'isolate',
+        WebkitBackfaceVisibility: 'hidden',
+      }}
+    >
+    <Link
+      href={`/vehicles/${vehicle.vehicle_id}`}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
         textDecoration: 'none',
         color: 'inherit',
         cursor: 'pointer',
-        isolation: 'isolate',
-        WebkitBackfaceVisibility: 'hidden',
       }}
     >
       {/* Image area */}
@@ -168,7 +174,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+      <div style={{ padding: '16px 16px 0', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
         {/* Name & location */}
         <div>
           <h3
@@ -215,52 +221,55 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             <SpecItem icon={<GaugeIcon size={12} />} label={`${vehicle.base_kilometers.toLocaleString()} km base`} />
           )}
         </div>
-
-        {/* Price + Book */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 'auto',
-          }}
-        >
-          <div>
-            <span
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                color: '#dc2828',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              {priceValue}
-            </span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginLeft: 3 }}>
-              {priceLabel}
-            </span>
-          </div>
-
-          <Link
-            href={`/reserve/${vehicle.vehicle_id}`}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#dc2828',
-              borderRadius: 8,
-              padding: '9px 18px',
-              fontSize: 13,
-              fontWeight: 700,
-              color: '#fff',
-              textDecoration: 'none',
-              display: 'inline-block',
-              transition: 'background 0.15s',
-            }}
-          >
-            Book Now
-          </Link>
-        </div>
       </div>
     </Link>
+
+      {/* Price + Book — a sibling of the card-detail Link above, not nested inside it, so
+          Book Now can be its own <Link> without producing invalid nested <a> tags (which
+          browsers "fix" by force-closing the outer one, silently splitting the card's layout). */}
+      <div
+        style={{
+          marginTop: 'auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px 16px',
+        }}
+      >
+        <div>
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: '#dc2828',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {priceValue}
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginLeft: 3 }}>
+            {priceLabel}
+          </span>
+        </div>
+
+        <Link
+          href={`/reserve/${vehicle.vehicle_id}`}
+          style={{
+            background: '#dc2828',
+            borderRadius: 8,
+            padding: '9px 18px',
+            fontSize: 13,
+            fontWeight: 700,
+            color: '#fff',
+            textDecoration: 'none',
+            display: 'inline-block',
+            transition: 'background 0.15s',
+          }}
+        >
+          Book Now
+        </Link>
+      </div>
+    </article>
   )
 }
 

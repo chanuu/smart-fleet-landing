@@ -1,4 +1,7 @@
-﻿import Link from 'next/link'
+﻿'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
 import type { TenantListing } from '@/types'
 import { ShieldCheckIcon } from './Icons'
 
@@ -28,7 +31,10 @@ function getYears(joinedAt: string): number {
 
 
 export default function PartnersSection({ tenants }: PartnersSectionProps) {
+  const [showAll, setShowAll] = useState(false)
   if (tenants.length === 0) return null
+
+  const displayed = showAll ? tenants : tenants.slice(0, 12)
 
   return (
     <section
@@ -87,7 +93,7 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
             gap: 20,
           }}
         >
-          {tenants.map((tenant, i) => {
+          {displayed.map((tenant, i) => {
             const accent = ACCENT_COLORS[i % ACCENT_COLORS.length]
             const years = getYears(tenant.joined_at)
             const initials = getInitials(tenant.name)
@@ -247,6 +253,31 @@ export default function PartnersSection({ tenants }: PartnersSectionProps) {
             )
           })}
         </div>
+
+        {/* Show more */}
+        {!showAll && tenants.length > 12 && (
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <button
+              onClick={() => setShowAll(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '12px 28px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.8)',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              Show all {tenants.length} companies →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )

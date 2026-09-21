@@ -62,7 +62,12 @@ function JsonLd() {
 
 async function getVehicles(): Promise<VehicleListing[]> {
   try {
-    const { data, error } = await supabase.rpc('get_public_vehicle_listings')
+    // Homepage only ever displays a ~27-vehicle teaser (see VehicleSection's
+    // slice(0, 27)), so there's no need to pull every public vehicle row here —
+    // ask the RPC for a generous-but-bounded batch instead. 150 leaves enough
+    // headroom for the type filter chips (Car/SUV/Van/Bus) to still have a
+    // reasonable number of matches per type after the client-side filter.
+    const { data, error } = await supabase.rpc('get_public_vehicle_listings', { p_limit: 150 })
     if (error) {
       console.error('Error fetching vehicles:', error)
       return []

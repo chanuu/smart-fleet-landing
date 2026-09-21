@@ -241,6 +241,13 @@ export default function TopNav() {
                     >
                       My Bookings
                     </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{ display: 'block', padding: '11px 16px', fontSize: 14, color: 'rgba(255,255,255,0.7)', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      My Profile
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       style={{ display: 'block', width: '100%', textAlign: 'left', padding: '11px 16px', fontSize: 14, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}

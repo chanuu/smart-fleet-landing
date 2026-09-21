@@ -20,7 +20,7 @@ export default function VehicleSection({ vehicles }: VehicleSectionProps) {
   const filtered =
     activeType === ALL_LABEL ? vehicles : vehicles.filter((v) => v.vehicle_type === activeType)
 
-  const displayed = filtered.slice(0, 9)
+  const displayed = filtered.slice(0, 27)
 
   return (
     <section
@@ -129,7 +129,7 @@ export default function VehicleSection({ vehicles }: VehicleSectionProps) {
       )}
 
       {/* View more */}
-      {filtered.length > 9 && (
+      {filtered.length > 27 && (
         <div style={{ textAlign: 'center', marginTop: 40 }}>
           <Link
             href="/browse"

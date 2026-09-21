@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { HERO_IMAGES, PROVINCES, VEHICLE_TYPES, STATS } from '@/lib/data'
+import { HERO_IMAGES, VEHICLE_TYPES, STATS } from '@/lib/data'
 import { supabase } from '@/lib/supabase'
 import type { VehicleListing } from '@/types'
 import { SearchIcon, ChevronDownIcon, MapPinIcon } from './Icons'
@@ -15,31 +15,33 @@ export default function Hero({ vehicles = [] }: HeroProps) {
   const router = useRouter()
   const [activeSlide, setActiveSlide] = useState(0)
   const [heroImages, setHeroImages] = useState<string[]>(HERO_IMAGES)
-  const [selectedProvince, setSelectedProvince] = useState('')
   const [selectedDistrict, setSelectedDistrict] = useState('')
+  const [selectedCity, setSelectedCity] = useState('')
   const [selectedType, setSelectedType] = useState('')
 
-  // Only offer provinces/districts/types that at least one available vehicle
+  // Only offer districts/cities/types that at least one available vehicle
   // actually has — a static list would let a visitor search into a dead end.
   // If no vehicle data was passed (e.g. fetch failure), fall back to the
-  // full static lists rather than leaving the search bar empty.
+  // full static list for vehicle types (there's no static district/city list).
   const hasVehicleData = vehicles.length > 0
 
-  const availableDistricts = new Set(
-    vehicles.map((v) => v.district_name).filter((d): d is string => !!d)
-  )
+  const availableDistricts = Array.from(
+    new Set(vehicles.map((v) => v.district_name).filter((d): d is string => !!d))
+  ).sort()
   const availableTypes = hasVehicleData
     ? Array.from(new Set(vehicles.map((v) => v.vehicle_type).filter((t): t is string => !!t))).sort()
     : VEHICLE_TYPES
-  const availableProvinces = hasVehicleData
-    ? Object.keys(PROVINCES).filter((p) => PROVINCES[p].some((d) => availableDistricts.has(d)))
-    : Object.keys(PROVINCES)
 
-  const districts = selectedProvince
-    ? hasVehicleData
-      ? (PROVINCES[selectedProvince] ?? []).filter((d) => availableDistricts.has(d))
-      : PROVINCES[selectedProvince] ?? []
-    : []
+  // Cities narrow to the selected district once one is picked; otherwise every
+  // city with at least one available vehicle.
+  const cities = Array.from(
+    new Set(
+      vehicles
+        .filter((v) => !selectedDistrict || v.district_name === selectedDistrict)
+        .map((v) => v.city_name)
+        .filter((c): c is string => !!c)
+    )
+  ).sort()
 
   // Load platform-managed hero images (falls back to defaults)
   // Old seed rows store a full external URL; new uploads store a storage
@@ -71,7 +73,7 @@ export default function Hero({ vehicles = [] }: HeroProps) {
   const handleSearch = () => {
     const params = new URLSearchParams()
     if (selectedDistrict) params.set('district', selectedDistrict)
-    else if (selectedProvince) params.set('province', selectedProvince)
+    if (selectedCity) params.set('city', selectedCity)
     if (selectedType) params.set('type', selectedType)
     router.push(`/browse?${params.toString()}`)
   }
@@ -183,7 +185,7 @@ export default function Hero({ vehicles = [] }: HeroProps) {
           }}
           className="search-grid"
         >
-          {/* Province */}
+          {/* District */}
           <div style={{ position: 'relative' }}>
             <MapPinIcon
               size={15}
@@ -197,10 +199,10 @@ export default function Hero({ vehicles = [] }: HeroProps) {
               }}
             />
             <select
-              value={selectedProvince}
+              value={selectedDistrict}
               onChange={(e) => {
-                setSelectedProvince(e.target.value)
-                setSelectedDistrict('')
+                setSelectedDistrict(e.target.value)
+                setSelectedCity('')
               }}
               style={{
                 width: '100%',
@@ -209,14 +211,14 @@ export default function Hero({ vehicles = [] }: HeroProps) {
                 borderRadius: 10,
                 padding: '12px 36px 12px 32px',
                 fontSize: 14,
-                color: selectedProvince ? '#fff' : 'rgba(255,255,255,0.38)',
+                color: selectedDistrict ? '#fff' : 'rgba(255,255,255,0.38)',
                 cursor: 'pointer',
                 appearance: 'none',
               }}
             >
-              <option value="" style={{ background: '#131313' }}>Province</option>
-              {availableProvinces.map((p) => (
-                <option key={p} value={p} style={{ background: '#131313' }}>{p}</option>
+              <option value="" style={{ background: '#131313' }}>District</option>
+              {availableDistricts.map((d) => (
+                <option key={d} value={d} style={{ background: '#131313' }}>{d}</option>
               ))}
             </select>
             <ChevronDownIcon
@@ -232,12 +234,12 @@ export default function Hero({ vehicles = [] }: HeroProps) {
             />
           </div>
 
-          {/* District */}
+          {/* City */}
           <div style={{ position: 'relative' }}>
             <select
-              value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.target.value)}
-              disabled={districts.length === 0}
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              disabled={cities.length === 0}
               style={{
                 width: '100%',
                 background: 'transparent',
@@ -245,15 +247,15 @@ export default function Hero({ vehicles = [] }: HeroProps) {
                 borderRadius: 10,
                 padding: '12px 36px 12px 14px',
                 fontSize: 14,
-                color: selectedDistrict ? '#fff' : 'rgba(255,255,255,0.38)',
-                cursor: districts.length > 0 ? 'pointer' : 'not-allowed',
+                color: selectedCity ? '#fff' : 'rgba(255,255,255,0.38)',
+                cursor: cities.length > 0 ? 'pointer' : 'not-allowed',
                 appearance: 'none',
-                opacity: districts.length === 0 ? 0.5 : 1,
+                opacity: cities.length === 0 ? 0.5 : 1,
               }}
             >
-              <option value="" style={{ background: '#131313' }}>District</option>
-              {districts.map((d) => (
-                <option key={d} value={d} style={{ background: '#131313' }}>{d}</option>
+              <option value="" style={{ background: '#131313' }}>City</option>
+              {cities.map((c) => (
+                <option key={c} value={c} style={{ background: '#131313' }}>{c}</option>
               ))}
             </select>
             <ChevronDownIcon

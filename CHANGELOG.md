@@ -6,6 +6,66 @@ All notable changes to this project will be documented in this file.
 the change was safe to ship, or what deploy-order/verification step was needed. New entries should
 follow the same format — see the process note in `CLAUDE.md`.
 
+## 2026-09 — Live-site session log
+
+### Fixed broken vehicle-card grid layout on homepage/browse (2026-09-21)
+- `VehicleCard.tsx` had a "Book Now" `<Link>` nested inside the card's outer `<Link>` — invalid
+  nested `<a>` HTML, which browsers silently "fix" by force-closing the outer anchor early. This
+  split each card's DOM into two fragments, corrupting the grid layout (alternating columns showed
+  only an image or only text, no card border) — reported by user via screenshot.
+- Fix: restructured to the sibling pattern already used in `CompanyVehicleCard.tsx` — outer
+  `<article>` wrapper (not an anchor), with the "view details" `<Link>` (image + name + specs) and
+  the "Book Now" `<Link>` as siblings instead of nested. Price/Book row uses `margin-top: auto` to
+  stay pinned to the card bottom.
+- Also fixed a regression caught during verification: an interim fix used a `<button onClick>` with
+  `preventDefault()`/`stopPropagation()` for Book Now, but that did not reliably cancel the outer
+  Link's navigation (a pre-existing quirk in this codebase — the untouched "Favorite" heart button
+  has the same issue and was left as-is, out of scope). The sibling-Link structure avoids relying on
+  event cancellation entirely.
+- **Risk:** none — presentation/markup-structure only, no data or RPC changes. Verified via
+  `next build` (clean) and Playwright: card grid renders as single fragments, "view details" and
+  "Book Now" navigate to the correct distinct URLs.
+
+### Replaced Province filter with District + City (2026-09-21)
+- Homepage `Hero.tsx` search bar: removed the Province → District cascading dropdowns, replaced
+  with District → City (cascading the same way — picking a district narrows the city list to
+  that district's available vehicles). Both lists are still data-driven (only districts/cities
+  with at least one available vehicle are offered), matching the existing pattern. `handleSearch`
+  now passes `district`/`city` query params to `/browse` instead of `district`/`province`.
+- `/browse` (`BrowsePage.tsx`) sidebar: added a City filter dropdown next to the existing
+  District one (same narrow-by-district behavior), reads its initial value from the new `city`
+  URL param, included in the free-text search match and the active-filter count/clear-all.
+- `lib/data.ts`'s `PROVINCES` export is no longer imported anywhere but left in place (still
+  backs `ALL_DISTRICTS`) — not removed, to avoid unrelated risk.
+- **Risk:** none — presentation/filter-logic only, same `VehicleListing` data (`city_name` was
+  already returned by the RPC, just unused in these two components before now).
+
+### "Show more" for the homepage Rent a Car Companies section (2026-09-20)
+- `PartnersSection.tsx` (homepage "Trusted rental companies" grid) previously rendered every
+  tenant with no cap. Added the same "show 12, then reveal the rest in place" pattern as the
+  vehicle teaser section: `'use client'` + local `showAll` state, `tenants.slice(0, 12)` by
+  default, a "Show all N companies →" button that reveals the full list in place (no navigation,
+  unlike the vehicle section's button which links to `/browse`).
+- Could not visually confirm the click interaction in this session's dev-server test harness —
+  WebSocket handshakes to the Turbopack dev server failed in that environment, which breaks
+  client-side hydration entirely there. Confirmed this was an environment limitation, not a code
+  bug, by reproducing the identical failure on the pre-existing, already-shipped vehicle-type
+  filter chips in `VehicleSection.tsx` (untouched by this change) in the same broken session —
+  and confirming the production build (`next build`, which doesn't depend on dev-mode HMR)
+  compiles and type-checks clean. Please click-test the live "Show all N companies" button after
+  deploy to be sure.
+- **Risk:** none — same data (`get_public_tenants()`, unchanged), display-only, same pattern as
+  the already-shipped vehicle section's "show more."
+
+### Homepage shows more vehicles before requiring a click to /browse (2026-09-20)
+- `VehicleSection.tsx`'s "Explore Fleet" teaser grid on the homepage was capping its initial
+  display to 9 vehicles (`filtered.slice(0, 9)`), with a "View all X vehicles →" button to
+  `/browse` for the rest. Not a data or API cap — `/browse` itself always showed the full,
+  correct count (confirmed 81 real listings). Raised the homepage teaser cap to 27 (and the
+  matching "show the View All button" threshold) so more of the actual fleet is visible on the
+  homepage itself before a visitor needs to click through.
+- **Risk:** none — display-count constant only, same data source, same `/browse` page unchanged.
+
 ## 2026-08 — Live-site session log
 
 ### Company profile: two-column hero, fleet header rate note, SEO metadata (2026-08-18)

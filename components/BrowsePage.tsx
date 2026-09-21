@@ -19,6 +19,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
   const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
   const [filterDistrict, setFilterDistrict] = useState(searchParams.get('district') ?? '')
+  const [filterCity, setFilterCity] = useState(searchParams.get('city') ?? '')
   const [filterType, setFilterType] = useState(searchParams.get('type') ?? '')
   const [filterTransmission, setFilterTransmission] = useState('')
   const [filterFuel, setFilterFuel] = useState('')
@@ -35,6 +36,17 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
     new Set(vehicles.map((v) => v.vehicle_type).filter((t): t is string => !!t))
   ).sort()
 
+  // Cities narrow to the selected district once one is picked; otherwise every
+  // city with at least one available vehicle.
+  const availableCities = Array.from(
+    new Set(
+      vehicles
+        .filter((v) => !filterDistrict || v.district_name === filterDistrict)
+        .map((v) => v.city_name)
+        .filter((c): c is string => !!c)
+    )
+  ).sort()
+
   const filterVehicles = useCallback(() => {
     return vehicles.filter((v) => {
       if (search) {
@@ -43,10 +55,12 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
           v.brand.toLowerCase().includes(q) ||
           (v.vehicle_type?.toLowerCase().includes(q) ?? false) ||
           (v.district_name?.toLowerCase().includes(q) ?? false) ||
+          (v.city_name?.toLowerCase().includes(q) ?? false) ||
           (v.registration_number.toLowerCase().includes(q))
         if (!matches) return false
       }
       if (filterDistrict && v.district_name !== filterDistrict) return false
+      if (filterCity && v.city_name !== filterCity) return false
       if (filterType && v.vehicle_type !== filterType) return false
       if (filterTransmission && v.transmission !== filterTransmission) return false
       if (filterFuel && v.fuel_type !== filterFuel) return false
@@ -54,7 +68,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
       if (v.base_rate && v.base_rate > maxPrice) return false
       return true
     })
-  }, [vehicles, search, filterDistrict, filterType, filterTransmission, filterFuel, filterSeats, maxPrice])
+  }, [vehicles, search, filterDistrict, filterCity, filterType, filterTransmission, filterFuel, filterSeats, maxPrice])
 
   const [filtered, setFiltered] = useState<VehicleListing[]>(() => filterVehicles())
 
@@ -64,6 +78,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
 
   const clearFilters = () => {
     setFilterDistrict('')
+    setFilterCity('')
     setFilterType('')
     setFilterTransmission('')
     setFilterFuel('')
@@ -74,6 +89,7 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
 
   const activeFilterCount = [
     filterDistrict,
+    filterCity,
     filterType,
     filterTransmission,
     filterFuel,
@@ -86,12 +102,27 @@ export default function BrowsePage({ vehicles }: BrowsePageProps) {
       <FilterGroup label="District">
         <select
           value={filterDistrict}
-          onChange={(e) => setFilterDistrict(e.target.value)}
+          onChange={(e) => { setFilterDistrict(e.target.value); setFilterCity('') }}
           style={selectStyle}
         >
           <option value="" style={{ background: '#131313' }}>All Districts</option>
           {ALL_DISTRICTS.map((d) => (
             <option key={d} value={d} style={{ background: '#131313' }}>{d}</option>
+          ))}
+        </select>
+      </FilterGroup>
+
+      {/* City */}
+      <FilterGroup label="City">
+        <select
+          value={filterCity}
+          onChange={(e) => setFilterCity(e.target.value)}
+          disabled={availableCities.length === 0}
+          style={{ ...selectStyle, opacity: availableCities.length === 0 ? 0.5 : 1 }}
+        >
+          <option value="" style={{ background: '#131313' }}>All Cities</option>
+          {availableCities.map((c) => (
+            <option key={c} value={c} style={{ background: '#131313' }}>{c}</option>
           ))}
         </select>
       </FilterGroup>
