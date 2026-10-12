@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
-import type { VehicleListing, PublicProfile } from '@/types'
+import type { VehicleListing, PublicProfile, RateOption } from '@/types'
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -42,6 +42,7 @@ interface FormData {
   return_time: string
   pickup_type: 'office' | 'delivery'
   delivery_address: string
+  selected_rate_plan_id: string
   // Step 2
   selected_addons: Record<string, boolean>
   // Step 3
@@ -62,6 +63,7 @@ const initialForm: FormData = {
   return_time: '18:00',
   pickup_type: 'office',
   delivery_address: '',
+  selected_rate_plan_id: '',
   selected_addons: {},
   customer_name: '',
   customer_phone: '',
@@ -122,6 +124,19 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   const [error, setError] = useState<string | null>(null)
   const [imgError, setImgError] = useState(false)
 
+  const rateOptions = vehicle.rate_options ?? []
+  const defaultRateOption = rateOptions.find(o => o.is_default) ?? rateOptions[0] ?? null
+
+  // Pre-select the default rate card once options load
+  useEffect(() => {
+    if (defaultRateOption && !form.selected_rate_plan_id) {
+      setForm(prev => ({ ...prev, selected_rate_plan_id: defaultRateOption.rate_plan_id }))
+    }
+  }, [defaultRateOption, form.selected_rate_plan_id])
+
+  const selectedRateOption =
+    rateOptions.find(o => o.rate_plan_id === form.selected_rate_plan_id) ?? defaultRateOption
+
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
   const location = [vehicle.city_name, vehicle.district_name].filter(Boolean).join(', ')
 
@@ -134,7 +149,8 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
     return Math.max(1, diff)
   })()
 
-  const baseTotal = (vehicle.base_rate ?? 0) * rentalDays
+  const effectiveBaseRate = selectedRateOption?.base_rate ?? vehicle.base_rate ?? 0
+  const baseTotal = effectiveBaseRate * rentalDays
   const addonsTotal = tenantAddons.reduce((sum, addon) => {
     if (!form.selected_addons[addon.name]) return sum
     return sum + (addon.per_day ? addon.price * rentalDays : addon.price)
@@ -196,6 +212,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
         p_with_driver: !!form.selected_addons['Professional Driver'],
         p_pickup_type: form.pickup_type,
         p_delivery_address: form.delivery_address.trim(),
+        p_rate_plan_id: selectedRateOption?.rate_plan_id ?? null,
         p_notes: [
           form.customer_nic.trim() ? `NIC: ${form.customer_nic.trim()}` : '',
           form.customer_address.trim() ? `Address: ${form.customer_address.trim()}` : '',
@@ -401,6 +418,9 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
               grandTotal={grandTotal}
               imgError={imgError}
               onImgError={() => setImgError(true)}
+              rateOptions={rateOptions}
+              selectedRateOption={selectedRateOption}
+              onSelectRatePlan={(id) => setForm(prev => ({ ...prev, selected_rate_plan_id: id }))}
             />
           </div>
         </div>
@@ -892,6 +912,9 @@ function VehicleSummaryCard({
   grandTotal,
   imgError,
   onImgError,
+  rateOptions,
+  selectedRateOption,
+  onSelectRatePlan,
 }: {
   vehicle: VehicleListing
   displayName: string
@@ -904,6 +927,9 @@ function VehicleSummaryCard({
   grandTotal: number
   imgError: boolean
   onImgError: () => void
+  rateOptions: RateOption[]
+  selectedRateOption: RateOption | null
+  onSelectRatePlan: (rateplanId: string) => void
 }) {
   return (
     <div
@@ -980,28 +1006,64 @@ function VehicleSummaryCard({
         ))}
       </div>
 
-      {/* Rate card info */}
-      {(vehicle.base_rate != null || vehicle.base_kilometers != null) && (
+      {/* Rate card — picker when the vehicle has more than one option, static display otherwise */}
+      {rateOptions.length > 1 ? (
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#D2042D', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-            {vehicle.rate_plan_name || 'Rate Card'}
+            Choose a Rate Card
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {rateOptions.map(opt => {
+              const active = selectedRateOption?.rate_plan_id === opt.rate_plan_id
+              return (
+                <button
+                  key={opt.rate_plan_id}
+                  type="button"
+                  onClick={() => onSelectRatePlan(opt.rate_plan_id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                    padding: '9px 12px',
+                    borderRadius: 10,
+                    border: `1px solid ${active ? '#D2042D' : 'rgba(255,255,255,0.10)'}`,
+                    background: active ? 'rgba(210,4,45,0.10)' : 'rgba(255,255,255,0.03)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 600, color: active ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+                    {opt.name}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>
+                    LKR {opt.base_rate.toLocaleString()} / {opt.rental_type === 'monthly' ? 'mo' : opt.rental_type === 'weekly' ? 'wk' : 'day'}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : (selectedRateOption?.base_rate != null || vehicle.base_rate != null) && (
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#D2042D', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            {selectedRateOption?.name ?? vehicle.rate_plan_name ?? 'Rate Card'}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {vehicle.base_rate != null && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  {vehicle.base_kilometers != null && vehicle.base_kilometers > 0
-                    ? `First ${vehicle.base_kilometers.toLocaleString()} km`
-                    : `Per ${vehicle.rental_type === 'monthly' ? 'month' : 'day'}`}
-                </span>
-                <span style={{ color: '#fff', fontWeight: 600 }}>LKR {vehicle.base_rate.toLocaleString()}</span>
-              </div>
-            )}
-            {vehicle.extra_rate_per_km != null && vehicle.extra_rate_per_km > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+              <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                {(selectedRateOption?.base_kilometers ?? vehicle.base_kilometers ?? 0) > 0
+                  ? `First ${(selectedRateOption?.base_kilometers ?? vehicle.base_kilometers)!.toLocaleString()} km`
+                  : `Per ${(selectedRateOption?.rental_type ?? vehicle.rental_type) === 'monthly' ? 'month' : (selectedRateOption?.rental_type ?? vehicle.rental_type) === 'weekly' ? 'week' : 'day'}`}
+              </span>
+              <span style={{ color: '#fff', fontWeight: 600 }}>LKR {(selectedRateOption?.base_rate ?? vehicle.base_rate ?? 0).toLocaleString()}</span>
+            </div>
+            {(selectedRateOption?.extra_rate_per_km ?? vehicle.extra_rate_per_km ?? 0) > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Extra per km</span>
-                <span style={{ color: '#fff', fontWeight: 600 }}>LKR {vehicle.extra_rate_per_km.toLocaleString()}</span>
+                <span style={{ color: '#fff', fontWeight: 600 }}>LKR {(selectedRateOption?.extra_rate_per_km ?? vehicle.extra_rate_per_km)!.toLocaleString()}</span>
               </div>
             )}
           </div>

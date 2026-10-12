@@ -6,7 +6,23 @@ All notable changes to this project will be documented in this file.
 the change was safe to ship, or what deploy-order/verification step was needed. New entries should
 follow the same format — see the process note in `CLAUDE.md`.
 
-## 2026-09 — Live-site session log
+## 2026-10 — Live-site session log
+
+### Rate card picker on Reserve page (2026-10-12)
+- `types/index.ts`: `VehicleListing` gained an optional `rate_options: RateOption[]` field (the
+  vehicle's default rate card + any additional ones an admin attached, from the admin-repo
+  migrations `20261012000001/2`). Existing flat fields (`rate_plan_name`, `base_rate`, etc.) are
+  unchanged and still describe the default plan, so nothing else on this site needed to change.
+- `ReservePage.tsx`: when a vehicle has more than one rate option, the sidebar's rate-card section
+  becomes a picker (Daily/Weekly/Monthly, etc.) instead of a static display; selecting one
+  recomputes the price estimate (`base_rate`/`base_kilometers`/`extra_rate_per_km`) live, same as
+  the existing single-plan estimate math. Defaults to whichever option the admin flagged default.
+  Falls back to the old static display when a vehicle has 0–1 options (unchanged behavior).
+- `handleSubmit` now passes `p_rate_plan_id` (the selected option, or `null`) to
+  `submit_public_booking_request` so the admin sees which rate the customer asked for.
+- **Risk:** none to existing vehicles — `rate_options` defaults to empty until an admin attaches
+  extra rate cards, in which case this is purely additive UI; the price estimate was already
+  display-only pre-submission (the admin finalizes real pricing when converting to a rental).
 
 ### Fixed broken vehicle-card grid layout on homepage/browse (2026-09-21)
 - `VehicleCard.tsx` had a "Book Now" `<Link>` nested inside the card's outer `<Link>` — invalid

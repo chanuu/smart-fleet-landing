@@ -1,3 +1,14 @@
+export interface RateOption {
+  rate_plan_id: string
+  name: string
+  rental_type: string
+  base_rate: number
+  base_kilometers: number | null
+  extra_rate_per_km: number | null
+  security_deposit: number
+  is_default: boolean
+}
+
 export interface VehicleListing {
   vehicle_id: string
   tenant_id: string
@@ -18,6 +29,10 @@ export interface VehicleListing {
   extra_rate_per_km: number | null
   security_deposit: number | null
   image_path: string | null
+  // all rate card options attached to this vehicle (default + any additional
+  // ones an admin attached) — null/empty when the RPC doesn't return it yet
+  // or the vehicle has no rate cards configured
+  rate_options?: RateOption[] | null
   // resolved at fetch time
   image_url?: string | null
 }
@@ -35,6 +50,7 @@ export interface BookingFormData {
   pickup_type: 'office' | 'delivery'
   delivery_address: string
   notes: string
+  rate_plan_id: string
 }
 
 export interface DistrictGroup {
