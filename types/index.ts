@@ -6,6 +6,8 @@ export interface RateOption {
   base_kilometers: number | null
   extra_rate_per_km: number | null
   security_deposit: number
+  min_days: number | null
+  max_days: number | null
   is_default: boolean
 }
 

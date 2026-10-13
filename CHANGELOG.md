@@ -8,6 +8,17 @@ follow the same format — see the process note in `CLAUDE.md`.
 
 ## 2026-10 — Live-site session log
 
+### Day-range activation for the rate card picker (2026-10-13)
+- `RateOption` gained `min_days`/`max_days` (from admin-repo migration `20261013000001/2`).
+- `ReservePage.tsx`: a rate card with a day-range rule now greys out (disabled, with its
+  "Min X–Y days" requirement shown) unless the customer's selected trip length falls in range;
+  cards with no rule stay always available. If nothing matches the selected range, falls back to
+  showing the vehicle's default card as active (mirrors the server-side validation added in the
+  same admin-repo migration set). Selection auto-corrects to a still-valid option when the
+  customer changes dates and their previous pick is no longer active.
+- **Risk:** none to existing vehicles — every rate card defaults to no rule (always available),
+  so this only changes behavior for cards an admin explicitly configures with a day range.
+
 ### Rate card picker on Reserve page (2026-10-12)
 - `types/index.ts`: `VehicleListing` gained an optional `rate_options: RateOption[]` field (the
   vehicle's default rate card + any additional ones an admin attached, from the admin-repo

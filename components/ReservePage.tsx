@@ -127,16 +127,6 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
   const rateOptions = vehicle.rate_options ?? []
   const defaultRateOption = rateOptions.find(o => o.is_default) ?? rateOptions[0] ?? null
 
-  // Pre-select the default rate card once options load
-  useEffect(() => {
-    if (defaultRateOption && !form.selected_rate_plan_id) {
-      setForm(prev => ({ ...prev, selected_rate_plan_id: defaultRateOption.rate_plan_id }))
-    }
-  }, [defaultRateOption, form.selected_rate_plan_id])
-
-  const selectedRateOption =
-    rateOptions.find(o => o.rate_plan_id === form.selected_rate_plan_id) ?? defaultRateOption
-
   const displayName = `${vehicle.brand}${vehicle.vehicle_type ? ' ' + vehicle.vehicle_type : ''}`
   const location = [vehicle.city_name, vehicle.district_name].filter(Boolean).join(', ')
 
@@ -148,6 +138,37 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
     const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
     return Math.max(1, diff)
   })()
+
+  // A card with no min/max rule is always available. One with a rule is only
+  // available when the selected trip length falls inside it.
+  const matchesDayRange = (opt: RateOption) =>
+    (opt.min_days == null && opt.max_days == null) ||
+    (rentalDays >= (opt.min_days ?? 1) && rentalDays <= (opt.max_days ?? Infinity))
+
+  // If nothing matches the selected trip length, fall back to the default
+  // card regardless of its own rule — same fallback the server enforces.
+  const matchedOptions = rateOptions.filter(matchesDayRange)
+  const activeOptions = matchedOptions.length > 0
+    ? matchedOptions
+    : (defaultRateOption ? [defaultRateOption] : [])
+
+  // Keep the selection valid as dates change: stick with the current pick if
+  // it's still active, otherwise fall back to the default (or first active).
+  useEffect(() => {
+    const stillActive = activeOptions.some(o => o.rate_plan_id === form.selected_rate_plan_id)
+    if (!stillActive) {
+      const next = activeOptions.find(o => o.is_default) ?? activeOptions[0] ?? null
+      if (next && next.rate_plan_id !== form.selected_rate_plan_id) {
+        setForm(prev => ({ ...prev, selected_rate_plan_id: next.rate_plan_id }))
+      }
+    }
+    // activeOptions is derived fresh each render from rateOptions/rentalDays — only
+    // re-run when the selection or the trip length actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rentalDays, form.selected_rate_plan_id])
+
+  const selectedRateOption =
+    rateOptions.find(o => o.rate_plan_id === form.selected_rate_plan_id) ?? defaultRateOption
 
   const effectiveBaseRate = selectedRateOption?.base_rate ?? vehicle.base_rate ?? 0
   const baseTotal = effectiveBaseRate * rentalDays
@@ -419,6 +440,7 @@ export default function ReservePage({ vehicle }: ReservePageProps) {
               imgError={imgError}
               onImgError={() => setImgError(true)}
               rateOptions={rateOptions}
+              activeOptions={activeOptions}
               selectedRateOption={selectedRateOption}
               onSelectRatePlan={(id) => setForm(prev => ({ ...prev, selected_rate_plan_id: id }))}
             />
@@ -913,6 +935,7 @@ function VehicleSummaryCard({
   imgError,
   onImgError,
   rateOptions,
+  activeOptions,
   selectedRateOption,
   onSelectRatePlan,
 }: {
@@ -928,6 +951,7 @@ function VehicleSummaryCard({
   imgError: boolean
   onImgError: () => void
   rateOptions: RateOption[]
+  activeOptions: RateOption[]
   selectedRateOption: RateOption | null
   onSelectRatePlan: (rateplanId: string) => void
 }) {
@@ -1015,12 +1039,18 @@ function VehicleSummaryCard({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {rateOptions.map(opt => {
-              const active = selectedRateOption?.rate_plan_id === opt.rate_plan_id
+              const selected = selectedRateOption?.rate_plan_id === opt.rate_plan_id
+              const isActive = activeOptions.some(o => o.rate_plan_id === opt.rate_plan_id)
+              const dayRangeLabel =
+                opt.min_days != null || opt.max_days != null
+                  ? `Min ${opt.min_days ?? 1}${opt.max_days != null ? `–${opt.max_days} days` : '+ days'}`
+                  : null
               return (
                 <button
                   key={opt.rate_plan_id}
                   type="button"
-                  onClick={() => onSelectRatePlan(opt.rate_plan_id)}
+                  disabled={!isActive}
+                  onClick={() => isActive && onSelectRatePlan(opt.rate_plan_id)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1028,16 +1058,24 @@ function VehicleSummaryCard({
                     gap: 10,
                     padding: '9px 12px',
                     borderRadius: 10,
-                    border: `1px solid ${active ? '#D2042D' : 'rgba(255,255,255,0.10)'}`,
-                    background: active ? 'rgba(210,4,45,0.10)' : 'rgba(255,255,255,0.03)',
-                    cursor: 'pointer',
+                    border: `1px solid ${selected ? '#D2042D' : 'rgba(255,255,255,0.10)'}`,
+                    background: selected ? 'rgba(210,4,45,0.10)' : 'rgba(255,255,255,0.03)',
+                    cursor: isActive ? 'pointer' : 'not-allowed',
+                    opacity: isActive ? 1 : 0.45,
                     textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontSize: 13, fontWeight: 600, color: active ? '#fff' : 'rgba(255,255,255,0.7)' }}>
-                    {opt.name}
+                  <span style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: selected ? '#fff' : 'rgba(255,255,255,0.7)' }}>
+                      {opt.name}
+                    </span>
+                    {dayRangeLabel && (
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                        {dayRangeLabel}
+                      </span>
+                    )}
                   </span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: active ? '#fff' : 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: selected ? '#fff' : 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>
                     LKR {opt.base_rate.toLocaleString()} / {opt.rental_type === 'monthly' ? 'mo' : opt.rental_type === 'weekly' ? 'wk' : 'day'}
                   </span>
                 </button>
